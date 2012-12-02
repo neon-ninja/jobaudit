@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:configuration.properties</value>
+			</list>
+		</property>
+	</bean>
+
+    <!-- Controllers -->
+	<bean id="userController" class="eresearch.audit.controller.UserController">
+	    <property name="userDao" ref="userDao"/>
+	</bean>
+	<bean id="statisticsController" class="eresearch.audit.controller.StatisticsController">
+	    <property name="userDao" ref="userDao"/>
+	    <property name="auditRecordDao" ref="auditRecordDao"/>
+	</bean>
+	<bean id="statisticsUserController" class="eresearch.audit.controller.StatisticsUserController">
+	    <property name="userDao" ref="userDao"/>
+	    <property name="auditRecordDao" ref="auditRecordDao"/>
+	    <property name="historyStartYear" value="${history.start.year}"/>
+	    <property name="historyStartMonth" value="${history.start.month}"/>
+	</bean>
+	<bean id="statisticsAffiliationController" class="eresearch.audit.controller.StatisticsAffiliationController">
+	    <property name="userDao" ref="userDao"/>
+	    <property name="auditRecordDao" ref="auditRecordDao"/>
+	    <property name="historyStartYear" value="${history.start.year}"/>
+	    <property name="historyStartMonth" value="${history.start.month}"/>
+	</bean>
+	<bean id="statisticsProjectController" class="eresearch.audit.controller.StatisticsProjectController">
+	    <property name="userDao" ref="userDao"/>
+	    <property name="auditRecordDao" ref="auditRecordDao"/>
+	    <property name="historyStartYear" value="${history.start.year}"/>
+	    <property name="historyStartMonth" value="${history.start.month}"/>
+	</bean>
+	<bean id="userRecordController" class="eresearch.audit.controller.UserRecordController">
+	    <property name="userDao" ref="userDao"/>
+	    <property name="auditRecordDao" ref="auditRecordDao"/>
+        <property name="maxJobRecordsPerPage" value="${display.max.jobrecords.per.page}"/>
+	</bean>
+
+	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="urlMap">
+			<map>
+				<entry key="/users">
+					<ref bean="userController" />
+				</entry>
+				<entry key="/userrecords">
+					<ref bean="userRecordController" />
+				</entry>
+				<entry key="/statistics">
+					<ref bean="statisticsController" />
+				</entry>
+				<entry key="/statistics_user">
+					<ref bean="statisticsUserController" />
+				</entry>
+				<entry key="/statistics_affiliation">
+					<ref bean="statisticsAffiliationController" />
+				</entry>
+				<entry key="/statistics_project">
+					<ref bean="statisticsProjectController" />
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+
+</beans>

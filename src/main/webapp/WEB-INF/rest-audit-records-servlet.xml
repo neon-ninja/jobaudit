@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:configuration.properties</value>
+			</list>
+		</property>
+	</bean>
+
+    <bean id="auditRecordResource" class="eresearch.audit.rest.AuditRecordResource" scope="singleton">
+        <property name="auditRecordDao" ref="auditRecordDao"/>
+        <property name="maxJobRecordsPerPage" value="${display.max.jobrecords.per.page}"/>
+    </bean>
+    
+    <bean id="userResource" class="eresearch.audit.rest.UserResource" scope="singleton">
+        <property name="userDao" ref="userDao"/>
+        <property name="auditRecordDao" ref="auditRecordDao"/>
+    </bean>
+
+</beans>

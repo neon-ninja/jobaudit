@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+  PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+  "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="User">
+   <!-- get information about user -->
+   <select id="getUser" parameterClass="java.lang.String" resultClass="eresearch.audit.pojo.User">
+       SELECT DISTINCT 
+         usermap.id as id, 
+         usermap.name as name, 
+         usermap.email as email, 
+         affiliation.code as affiliation
+       FROM usermap, affiliation
+       WHERE usermap.id = affiliation.id AND usermap.id = #upi#
+   </select>
+</sqlMap>

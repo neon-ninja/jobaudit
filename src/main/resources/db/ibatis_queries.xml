@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+  PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+  "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ibatis_queries">
+
+   <!-- get list of users that submitted at least 1 job -->
+   <select id="getUsersWithAtLeastOneJob" resultClass="java.lang.String">
+       SELECT DISTINCT
+         user
+       FROM audit
+       ORDER BY user
+   </select>
+   
+   <!-- get information about user -->
+   <select id="getUser" parameterClass="java.lang.String" resultClass="eresearch.audit.pojo.User">
+       SELECT DISTINCT
+         usermap.id as id,
+         usermap.name as name,
+         usermap.email as email,
+         affiliation.code as affiliation
+       FROM usermap, affiliation
+       WHERE usermap.id = affiliation.id AND
+             usermap.id = #upi#
+   </select>
+
+   <!-- get list of all possible affilations -->
+   <select id="getAffiliations" resultClass="eresearch.audit.pojo.Affiliation">
+       SELECT DISTINCT
+         code, 
+         dept1, 
+         dept2
+       FROM affiliation
+   </select>
+
+   <select id="getUsersForProject" parameterClass="java.lang.String"  resultClass="java.lang.String">
+       SELECT DISTINCT
+         user
+       FROM
+         audit
+       WHERE account = #project#
+   </select>
+
+   <select id="getUsersForAllProjects" parameterClass="java.lang.String"  resultClass="java.lang.String">
+       SELECT DISTINCT
+         user
+       FROM
+         audit
+       WHERE account like 'nesi%'
+   </select>
+
+   <!-- get users with a certain code -->
+   <select id="getUsersForAffiliationCode" parameterClass="java.lang.String"  resultClass="java.lang.String">
+       SELECT
+         id
+       FROM affiliation
+       WHERE
+         code = #code#
+   </select>
+
+   <select id="getUsersForAffiliationCodeAndDept1" parameterClass="java.util.Map"  resultClass="java.lang.String">
+       SELECT
+         id
+       FROM affiliation
+       WHERE
+         code = #code# AND
+         dept1 = #dept1#
+   </select>
+
+   <select id="getUsersForAffiliationCodeAndDept1AndDept2" parameterClass="java.util.Map" resultClass="java.lang.String">
+       SELECT
+         id
+       FROM affiliation
+       WHERE
+         code = #code# AND
+         dept1 = #dept1# AND
+         dept2 = #dept2#
+   </select>
+
+   <select id="getProjectNames" resultClass="java.lang.String">
+       SELECT DISTINCT
+         account
+       FROM audit
+       WHERE account LIKE 'nesi%'
+       ORDER BY account
+   </select>
+   
+   <!-- get number of jobs submitted by a user -->
+   <select id="getNumberAuditRecordsOfUser" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+       SELECT
+         COUNT(user)
+       FROM audit
+       WHERE user = #upi#
+   </select>
+   
+   <!-- get audit records of a user -->
+   <select id="getAuditRecordsOfUser" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.AuditRecord">
+       SELECT 
+         account,
+         appstatus,
+         cores,
+         executable,
+         jobgroup,
+         jobid,
+         jobname,
+         jobtype,
+         nodes,
+         processors,
+         queue,
+         status,
+         user,
+         walltime,
+         iwd AS workingdir,
+         mem/1024 AS mem,
+         vmem/1024 AS vmem,
+         memrequested/1024 AS memrequested,
+         IF(qtime>0, FROM_UNIXTIME(qtime, '%Y/%m/%d %H:%i:%s'), 'N/A') AS qtime,
+         IF(start>0, FROM_UNIXTIME(start, '%Y/%m/%d %H:%i:%s'), 'N/A') AS start,
+         IF(done>0, FROM_UNIXTIME(done, '%Y/%m/%d %H:%i:%s'), 'N/A') AS done,
+         (done-start)*cores AS coretime,
+         ROUND((utilisation/((done-start)*cores)) * 100) AS efficacy,
+         IF((flags <![CDATA[ & ]]> 262144) = 0, 'yes', 'no') AS shared
+       FROM audit
+       WHERE user = #upi#
+       ORDER BY $orderby$ $sortorder$
+       LIMIT #offset#,#amount#
+   </select>
+
+   <!-- get statistics for user -->
+   <select id="getStatisticsForUser" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.UserStatistics">
+     <![CDATA[
+       SELECT
+         user AS user,
+         count(*) AS jobs,
+         sum(cores) AS total_cores,
+         TRUNCATE(SUM(IF(done>start, cores*(done-start), 0))/3600, 2) AS total_core_hours,
+         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600, 2) AS total_waiting_time,
+         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600/count(*), 2) AS average_waiting_time
+       FROM audit 
+       WHERE done>=#bottom# AND
+             done<#top# AND
+             user = #upi#
+     ]]>
+   </select>
+   
+   <!-- get statistics for a set of projects for a set of users -->
+   <select id="getStatisticsForProjectSet" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.UserStatistics">
+     <![CDATA[
+       SELECT
+         user AS user,
+         count(*) AS jobs, 
+         sum(cores) AS total_cores, 
+         TRUNCATE(SUM(IF(done>start, cores*(done-start), 0))/3600, 2) AS total_core_hours,
+         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600, 2) AS total_waiting_time,
+         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600/count(*), 2) AS average_waiting_time
+       FROM audit 
+       WHERE done>=#bottom# AND
+             done<#top# AND
+     ]]>
+             account IN <iterate property="projects" open="(" close=")" conjunction=","> #projects[]# </iterate>
+       GROUP BY user
+   </select>
+   
+   <!-- queries to create the bar diagrams -->
+   
+   <!-- statistics for all users for a time interval -->
+   <select id="getBarDiagramStatisticsForAllUsersForInterval" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.BarDiagramStatistics">
+     <![CDATA[
+       SELECT
+         SUM(IF(jobtype='serial',1,0)) AS serial_jobs,
+         SUM(IF(jobtype='parallel',1,0)) AS parallel_jobs,
+         TRUNCATE(SUM(IF(jobtype='serial' AND done>start, cores*(done-start), 0))/3600,2) AS serial_core_hours,
+         TRUNCATE(SUM(IF(jobtype='parallel' AND done>start, cores*(done-start), 0))/3600,2) AS parallel_core_hours,
+         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600/count(*), 2) as avg_waiting_hours
+       FROM audit 
+       WHERE done>=#bottom# AND
+             done<#top#
+     ]]>
+   </select>
+
+   <!-- statistics for all users affiliated with a certain institute, for a time interval -->
+   <select id="getBarDiagramStatisticsForUserSetForInterval" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.BarDiagramStatistics">
+     <![CDATA[
+       SELECT
+         SUM(IF(jobtype='serial',1,0)) AS serial_jobs,
+         SUM(IF(jobtype='parallel',1,0)) AS parallel_jobs,
+         TRUNCATE(SUM(IF(jobtype='serial' AND done>start, cores*(done-start), 0))/3600,2) AS serial_core_hours,
+         TRUNCATE(SUM(IF(jobtype='parallel' AND done>start, cores*(done-start), 0))/3600,2) AS parallel_core_hours,
+         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600/count(*), 2) as avg_waiting_hours
+       FROM audit 
+       WHERE done>=#bottom# AND
+             done<#top# AND
+     ]]>
+             user IN <iterate property="uids" open="(" close=")" conjunction=","> #uids[]# </iterate>
+   </select>
+
+   <!-- statistics for a set of projects, for a time interval -->
+   <select id="getBarDiagramStatisticsForProjectSetForInterval" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.BarDiagramStatistics">
+     <![CDATA[
+       SELECT
+         SUM(IF(jobtype='serial',1,0)) AS serial_jobs,
+         SUM(IF(jobtype='parallel',1,0)) AS parallel_jobs,
+         TRUNCATE(SUM(IF(jobtype='serial' AND done>start, cores*(done-start), 0))/3600,2) AS serial_core_hours,
+         TRUNCATE(SUM(IF(jobtype='parallel' AND done>start, cores*(done-start), 0))/3600,2) AS parallel_core_hours,
+         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600/count(*), 2) as avg_waiting_hours
+       FROM audit 
+       WHERE done>=#bottom# AND
+             done<#top# AND
+     ]]>
+             account IN <iterate property="projects" open="(" close=")" conjunction=","> #projects[]# </iterate>
+   </select>
+  
+</sqlMap>
