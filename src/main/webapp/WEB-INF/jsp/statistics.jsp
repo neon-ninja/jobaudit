@@ -269,8 +269,10 @@
       <th>User Name</th>
       <th>User ID</th>
       <th>Jobs</th>
+      <th>Jobs (Grid)</th>
       <th>Total Cores</th>
       <th>Total Core Hours</th>
+      <th>Total Core Hours (Grid)</th>
       <th>Total Waiting Time</th>
       <th>Average Waiting Time</th>
     </tr>
@@ -282,8 +284,10 @@
             <script type="text/javascript">document.write(usermap["${statistics.user}"]);</script></a></td> 
       <td><a href="<%=request.getContextPath()%>/html/userrecords?upi=${statistics.user}">${statistics.user}</a></td> 
       <td>${statistics.jobs}</td> 
+      <td>${statistics.grid_jobs}</td> 
       <td>${statistics.total_cores}</td> 
       <td>${statistics.total_core_hours}</td> 
+      <td>${statistics.total_grid_core_hours}</td> 
       <td>${statistics.total_waiting_time}</td> 
       <td>${statistics.average_waiting_time}</td>
     </tr>
