@@ -133,8 +133,10 @@
        SELECT
          user AS user,
          count(*) AS jobs,
+         SUM(IF(executable like '%.globus%', 1, 0)) AS grid_jobs,
          sum(cores) AS total_cores,
          TRUNCATE(SUM(IF(done>start, cores*(done-start), 0))/3600, 2) AS total_core_hours,
+         TRUNCATE(SUM(IF(done>start, IF(executable like '%.globus%', cores*(done-start), 0),0))/3600, 2) AS total_grid_core_hours,
          TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600, 2) AS total_waiting_time,
          TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600/count(*), 2) AS average_waiting_time
        FROM audit 

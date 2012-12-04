@@ -166,20 +166,34 @@
   <br>  
   <c:set var="totalNumberJobs" value="0" />
   <c:set var="totalCoreHours" value="0" />
+  <c:set var="totalNumberGridJobs" value="0" />
+  <c:set var="totalGridCoreHours" value="0" />
   <c:forEach items="${user_statistics}" var="statistics">
     <c:set var="totalNumberJobs" value="${totalNumberJobs + statistics.jobs}" />
     <c:set var="totalCoreHours" value="${totalCoreHours + statistics.total_core_hours}" />
+    <c:set var="totalNumberGridJobs" value="${totalNumberGridJobs + statistics.grid_jobs}" />
+    <c:set var="totalGridCoreHours" value="${totalGridCoreHours + statistics.total_grid_core_hours}" />
   </c:forEach>
+  
+  <c:set var="gridJobsPercentage" value="${(100*totalNumberGridJobs)/totalNumberJobs}" />
+  <c:set var="gridTotalHoursPercentage" value="${(100*totalGridCoreHours)/totalCoreHours}" />
 
   <h4>Total number of jobs</h4>
   <table id="bordered">
+  	<tr>
+  	  <td></td>
+  	  <td align="right">Total</td>
+  	  <td align="right">Via grid</td>
+  	</tr>
     <tr>
       <td>Total number of jobs</td>
-      <td><b>${totalNumberJobs}</b></td>
+      <td align="right"><b>${totalNumberJobs}</b></td>
+      <td align="right"><b>${totalNumberGridJobs}</b> (<script type="text/javascript">document.write(${gridJobsPercentage}.toFixed(2))</script> %)</td>
     </tr>
     <tr>
       <td>Total core hours</td>
-      <td><b><script type="text/javascript">document.write(${totalCoreHours}.toFixed(2))</script></b></td>
+      <td align="right"><b><script type="text/javascript">document.write(${totalCoreHours}.toFixed(2))</script></b></td>
+      <td align="right"><b><script type="text/javascript">document.write(${totalGridCoreHours}.toFixed(2))</script></b> (<script type="text/javascript">document.write(${gridTotalHoursPercentage}.toFixed(2))</script> %)</td>
     </tr>
   </table>
 
