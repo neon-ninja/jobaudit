@@ -131,7 +131,7 @@
 	
     $(document).ready(function() {
     	build_initial_selects();
-        $("#statistics").tablesorter({widgets:['zebra'], sortList:[[4,1]]});
+        $("#statistics").tablesorter({widgets:['zebra'], sortList:[[5,1]]});
     });
   </script>
 </head>
