@@ -181,17 +181,17 @@
   <h4>Total number of jobs</h4>
   <table id="bordered">
   	<tr>
-  	  <td></td>
+  	  <td>&nbsp;</td>
   	  <td align="right">Total</td>
-  	  <td align="right">Via grid</td>
+  	  <td align="right">Via Grid</td>
   	</tr>
     <tr>
-      <td>Total number of jobs</td>
+      <td>Number of jobs</td>
       <td align="right"><b>${totalNumberJobs}</b></td>
       <td align="right"><b>${totalNumberGridJobs}</b> (<script type="text/javascript">document.write(${gridJobsPercentage}.toFixed(2))</script> %)</td>
     </tr>
     <tr>
-      <td>Total core hours</td>
+      <td>Core hours</td>
       <td align="right"><b><script type="text/javascript">document.write(${totalCoreHours}.toFixed(2))</script></b></td>
       <td align="right"><b><script type="text/javascript">document.write(${totalGridCoreHours}.toFixed(2))</script></b> (<script type="text/javascript">document.write(${gridTotalHoursPercentage}.toFixed(2))</script> %)</td>
     </tr>
