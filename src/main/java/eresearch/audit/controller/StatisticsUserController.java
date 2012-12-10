@@ -85,15 +85,20 @@ public class StatisticsUserController extends StatisticsController {
 		setHistoryEndYear(Integer.parseInt(((String[]) params.get("to_y"))[0]));
 		setHistoryEndMonth(Integer.parseInt(((String[]) params.get("to_m"))[0]));
 		
+		String user=((String[]) params.get("user"))[0];
+		
 		if (params.containsKey("user")) 
 		{
-			users.add(((String[]) params.get("user"))[0]);
-			setSelectedUser(((String[]) params.get("user"))[0]);
+			if (user.equalsIgnoreCase("all")) {
+				users.addAll(super.userDao.getUserNames().get());
+			} else {
+				users.add(user);
+			}
+			setSelectedUser(user);
 		} else {
-			// list of all user names
+		// list of all user names
 			users.addAll(super.userDao.getUserNames().get());
 		}
 		return users;
 	}
-
 }

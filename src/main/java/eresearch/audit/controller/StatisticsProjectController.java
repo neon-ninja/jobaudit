@@ -60,20 +60,26 @@ public class StatisticsProjectController extends StatisticsController {
 	    return mav;
 	}
 
-	protected List<String> createProjectList(HttpServletRequest req, ModelAndView mav) throws Exception {
+	protected List<String> createProjectList(HttpServletRequest req,
+			ModelAndView mav) throws Exception {
 		Map params = req.getParameterMap();
 		List<String> projects = new LinkedList<String>();
-		
+
 		setHistoryStartYear(Integer.parseInt(((String[]) params.get("from_y"))[0]));
 		setHistoryStartMonth(Integer.parseInt(((String[]) params.get("from_m"))[0]));
 		setHistoryEndYear(Integer.parseInt(((String[]) params.get("to_y"))[0]));
 		setHistoryEndMonth(Integer.parseInt(((String[]) params.get("to_m"))[0]));
-		
+
+		String project = ((String[]) params.get("project"))[0];
 		if (params.containsKey("project")) {
-			projects.add(((String[]) params.get("project"))[0]);
-			setSelectedProject(((String[]) params.get("project"))[0]);
+			if (project.equalsIgnoreCase("all")) {
+				projects.addAll(super.auditRecordDao.getProjectNames().get());
+			} else {
+				projects.add(project);
+			}
+			setSelectedProject(project);
 		} else {
-			projects = (List<String>)mav.getModelMap().get("projects");
+			projects = (List<String>) mav.getModelMap().get("projects");
 		}
 		return projects;
 	}
