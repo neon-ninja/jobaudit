@@ -19,6 +19,13 @@ public class StatisticsController extends AbstractController {
 	protected AuditRecordDao auditRecordDao;
 	protected Integer historyStartYear;
 	protected Integer historyStartMonth;
+	protected Integer historyEndYear;
+	protected Integer historyEndMonth;
+	
+	//created for retaining the drop-down values
+	protected String selectedUser;
+	protected String selectedProject;
+	protected String selectedAffiliation;
 
 	public ModelAndView handleRequestInternal(HttpServletRequest request,
 		HttpServletResponse response) throws Exception {
@@ -26,9 +33,19 @@ public class StatisticsController extends AbstractController {
 		Future<List<User>> fuser = this.userDao.getUsers();
 		Future<List<String>> faffil = this.userDao.getAffiliations();
 		Future<List<String>> fproys = this.auditRecordDao.getProjectNames();
+		Future<List<String>> fyears = this.auditRecordDao.getAuditYears();
+
 		mav.addObject("users", fuser.get());
 		mav.addObject("affiliations", faffil.get());
 		mav.addObject("projects", fproys.get());
+		mav.addObject("years", fyears.get());
+
+		//for retaining drop-down values in UI
+		mav.addObject("startYear", historyStartYear);
+		mav.addObject("startMonth", historyStartMonth);
+		mav.addObject("endYear", historyEndYear);
+		mav.addObject("endMonth", historyEndMonth);
+
 		return mav;
 	}
 
@@ -48,4 +65,36 @@ public class StatisticsController extends AbstractController {
 		this.historyStartMonth = historyStartMonth;
 	}
 	
+
+	public void setHistoryEndYear(Integer historyEndYear) {
+		this.historyEndYear = historyEndYear;
+	}
+
+	public void setHistoryEndMonth(Integer historyEndMonth) {
+		this.historyEndMonth = historyEndMonth;
+	}
+
+	public String getSelectedUser() {
+		return selectedUser;
+	}
+
+	public void setSelectedUser(String selectedUser) {
+		this.selectedUser = selectedUser;
+	}
+
+	public String getSelectedProject() {
+		return selectedProject;
+	}
+
+	public void setSelectedProject(String selectedProject) {
+		this.selectedProject = selectedProject;
+	}
+
+	public String getSelectedAffiliation() {
+		return selectedAffiliation;
+	}
+
+	public void setSelectedAffiliation(String selectedAffiliation) {
+		this.selectedAffiliation = selectedAffiliation;
+	}	
 }

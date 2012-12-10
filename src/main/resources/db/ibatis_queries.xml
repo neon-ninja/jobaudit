@@ -11,6 +11,7 @@
          user
        FROM audit
        ORDER BY user
+       limit 20
    </select>
    
    <!-- get information about user -->
@@ -32,6 +33,7 @@
          dept1, 
          dept2
        FROM affiliation
+       limit 50
    </select>
 
    <select id="getUsersForProject" parameterClass="java.lang.String"  resultClass="java.lang.String">
@@ -142,7 +144,8 @@
        FROM audit 
        WHERE done>=#bottom# AND
              done<#top# AND
-             user = #upi#
+             user = #upi# 
+
      ]]>
    </select>
    
@@ -211,6 +214,13 @@
              done<#top# AND
      ]]>
              account IN <iterate property="projects" open="(" close=")" conjunction=","> #projects[]# </iterate>
+   </select>
+   
+	<!--fetch a list of all the distinct 'year' values in the audit table (except 1970) -->
+   <select id="getAuditYears" resultClass="java.lang.String">
+   	<![CDATA[
+   		SELECT DISTINCT FROM_UNIXTIME(DONE,'%Y') AS YEARS FROM AUDIT WHERE FROM_UNIXTIME(DONE,'%Y')>1970; 
+   	]]>
    </select>
   
 </sqlMap>

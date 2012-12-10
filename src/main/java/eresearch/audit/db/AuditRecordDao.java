@@ -12,6 +12,7 @@ public interface AuditRecordDao {
 	public Future<List<AuditRecord>> getRecords(String upi, String orderby, String sortorder, long offset, long amount) throws Exception;
 	public Future<Integer> getNumberRecords(String user) throws Exception;
 	public Future<List<String>> getProjectNames() throws Exception;
+	public Future<List<String>> getAuditYears() throws Exception;
 	public Future<UserStatistics> getStatisticsForUser(String uids, String bottom, String top) throws Exception;
 	public Future<List<UserStatistics>> getStatisticsForProjectSet(List<String> projects, String bottom, String top) throws Exception;
 	public Future<BarDiagramStatistics> getBarDiagramStatisticsForAllUsers(String bottom, String top) throws Exception;

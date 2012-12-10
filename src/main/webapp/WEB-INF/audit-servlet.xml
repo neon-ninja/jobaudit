@@ -19,30 +19,53 @@
 	<bean id="statisticsController" class="eresearch.audit.controller.StatisticsController">
 	    <property name="userDao" ref="userDao"/>
 	    <property name="auditRecordDao" ref="auditRecordDao"/>
+	    <property name="historyStartYear" value="${history.start.year}"/>
+	    <property name="historyStartMonth" value="${history.start.month}"/>
+	    <property name="historyEndYear" value="${history.end.year}"/>
+	    <property name="historyEndMonth" value="${history.end.month}"/>
+<!-- 	    <property name="selectedUser" value="1"/> -->
+<!-- 	    <property name="selectedProject" value="1"/> -->
+<!-- 	    <property name="selectedAffiliation" value="1"/> -->
 	</bean>
 	<bean id="statisticsUserController" class="eresearch.audit.controller.StatisticsUserController">
 	    <property name="userDao" ref="userDao"/>
 	    <property name="auditRecordDao" ref="auditRecordDao"/>
 	    <property name="historyStartYear" value="${history.start.year}"/>
 	    <property name="historyStartMonth" value="${history.start.month}"/>
+	    <property name="historyEndYear" value="${history.end.year}"/>
+	    <property name="historyEndMonth" value="${history.end.month}"/>	    
+	    <property name="selectedUser" value=""/>
+	    <property name="selectedProject" value=""/>
+	    <property name="selectedAffiliation" value=""/>	    
 	</bean>
 	<bean id="statisticsAffiliationController" class="eresearch.audit.controller.StatisticsAffiliationController">
 	    <property name="userDao" ref="userDao"/>
 	    <property name="auditRecordDao" ref="auditRecordDao"/>
 	    <property name="historyStartYear" value="${history.start.year}"/>
 	    <property name="historyStartMonth" value="${history.start.month}"/>
+	    <property name="historyEndYear" value="${history.end.year}"/>
+	    <property name="historyEndMonth" value="${history.end.month}"/>
+	    <property name="selectedUser" value=""/>
+	    <property name="selectedProject" value=""/>
+	    <property name="selectedAffiliation" value=""/>	    	    
 	</bean>
 	<bean id="statisticsProjectController" class="eresearch.audit.controller.StatisticsProjectController">
 	    <property name="userDao" ref="userDao"/>
 	    <property name="auditRecordDao" ref="auditRecordDao"/>
 	    <property name="historyStartYear" value="${history.start.year}"/>
 	    <property name="historyStartMonth" value="${history.start.month}"/>
+	    <property name="historyEndYear" value="${history.end.year}"/>
+	    <property name="historyEndMonth" value="${history.end.month}"/>
+	    <property name="selectedUser" value=""/>
+	    <property name="selectedProject" value=""/>
+	    <property name="selectedAffiliation" value=""/>	    	    
 	</bean>
 	<bean id="userRecordController" class="eresearch.audit.controller.UserRecordController">
 	    <property name="userDao" ref="userDao"/>
 	    <property name="auditRecordDao" ref="auditRecordDao"/>
         <property name="maxJobRecordsPerPage" value="${display.max.jobrecords.per.page}"/>
 	</bean>
+
 
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="urlMap">

@@ -29,24 +29,27 @@ public class StatisticsUserController extends StatisticsController {
 		for (String user: userlist) {
 			uslist.add(this.auditRecordDao.getStatisticsForUser(user, "0", new Long(new Date().getTime()/1000).toString()));
 		}
-        
-		Calendar c = Calendar.getInstance();
-		Calendar now = Calendar.getInstance();
-		int month = super.historyStartMonth - 1;
-		c.set(super.historyStartYear, month, 1, 0, 0, 0);
 		
 		// get data for bar diagrams
-        while (c.get(Calendar.YEAR) <= now.get(Calendar.YEAR) && c.get(Calendar.MONTH) <= now.get(Calendar.MONTH)) {
-        	long bottom = c.getTimeInMillis()/1000;
-            c.set(this.historyStartYear, month+1, 1, 0, 0, 0);
-		    long top = c.getTimeInMillis()/1000;
+		Calendar from = Calendar.getInstance();
+		Calendar to= Calendar.getInstance();
+		int month = super.historyStartMonth - 1;
+
+		//time period related changes		
+		from.set(super.historyStartYear, super.historyStartMonth, 1);
+		to.set(super.historyEndYear, super.historyEndMonth, 1);
+
+		while ((from.get(Calendar.YEAR) <= to.get(Calendar.YEAR) && !(from.get(Calendar.YEAR) == to.get(Calendar.YEAR) && from.get(Calendar.MONTH) > to.get(Calendar.MONTH)))) {
+        	long bottom = from.getTimeInMillis()/1000;
+            from.set(this.historyStartYear, month+1, 1, 0, 0, 0);
+		    long top = from.getTimeInMillis()/1000;
 		    if (userlist.size() < 1) {
 			    fbdslist.add(auditRecordDao.getBarDiagramStatisticsForAllUsers(Long.toString(bottom), Long.toString(top)));
 		    } else {
 			    fbdslist.add(auditRecordDao.getBarDiagramStatisticsForUserSet(userlist, Long.toString(bottom), Long.toString(top)));		        	
 		    }
 		    month += 1;
-		    c.set(this.historyStartYear, month, 1, 0, 0, 0);
+		    from.set(this.historyStartYear, month, 1, 0, 0, 0);
 		}
         
         // collect information from futures
@@ -58,16 +61,34 @@ public class StatisticsUserController extends StatisticsController {
         for (Future<BarDiagramStatistics> fbds : fbdslist) {
         	bdslist.add(fbds.get());
         }
+        
 		mav.addObject("user_statistics", userstatslist);
 		mav.addObject("job_statistics", bdslist);
+		
+		//for retaining dropdown values
+		mav.addObject("startYear", historyStartYear);
+		mav.addObject("startMonth", historyStartMonth);
+		mav.addObject("endYear", historyEndYear);
+		mav.addObject("endMonth", historyEndMonth);
+		mav.addObject("selectedUser", selectedUser);
+		mav.addObject("selectedAffiliation", selectedAffiliation);
+		
 	    return mav;
 	}
 
 	protected List<String> createUserList(HttpServletRequest req) throws Exception {
 		Map params = req.getParameterMap();
 		List<String> users = new LinkedList<String>();
-		if (params.containsKey("user")) {
+		
+		setHistoryStartYear(Integer.parseInt(((String[]) params.get("from_y"))[0]));
+		setHistoryStartMonth(Integer.parseInt(((String[]) params.get("from_m"))[0]));
+		setHistoryEndYear(Integer.parseInt(((String[]) params.get("to_y"))[0]));
+		setHistoryEndMonth(Integer.parseInt(((String[]) params.get("to_m"))[0]));
+		
+		if (params.containsKey("user")) 
+		{
 			users.add(((String[]) params.get("user"))[0]);
+			setSelectedUser(((String[]) params.get("user"))[0]);
 		} else {
 			// list of all user names
 			users.addAll(super.userDao.getUserNames().get());

@@ -20,16 +20,16 @@
     var monthly_parallel_jobs_data = new Array();
     var monthly_parallel_core_hours_data = new Array();
     var monthly_avg_waiting_hours_data = new Array();
-    
-    // query string params
-	var qs_user = getParameterByName("user");
-	var qs_affil = getParameterByName("affiliation");
-	var qs_project = getParameterByName("project");
 
+	var qs_user;
+	var qs_affil;
+	var qs_project;
+	
 	var users = new Array();
 	var usermap = new Array();
 	var affils = new Array();
 	var projects = new Array();
+	var years = new Array();
     <c:forEach items="${users}" var="tmp">
 	  users.push(new Array("${tmp.id}", "${tmp.name}"));
 	  usermap["${tmp.id}"] = "${tmp.name}";
@@ -42,14 +42,36 @@
     </c:forEach>
 
     function get_data() {
-		var val_select1 = $("#select1").val();
-		var val_select2 = $("#select2").val();
-        var all_until_last_element = window.location.pathname.lastIndexOf("/");
-        var url = window.location.pathname.substr(0,all_until_last_element) + "/statistics_" + val_select1;
-        if (val_select2 != "") {
-        	url += "?" + val_select1 + "=" + val_select2;
-        }
-        window.location.href = url;
+    	var from_m=$("#select_from_month").val();
+    	var from_y=$("#select_from_year").val();
+    	var to_m=$("#select_to_month").val();
+    	var to_y=$("#select_to_year").val();
+    	
+    	if((from_y>to_y) || ((from_y==to_y) && (parseInt(from_m)>parseInt(to_m))))
+    	{
+    		alert("From date cannot be greater than to date");
+    	}
+    	else
+    	{
+	    	var val_select1 = $("#select1").val();
+			var val_select2 = $("#select2").val();
+	        var all_until_last_element = window.location.pathname.lastIndexOf("/");
+	        var url = window.location.pathname.substr(0,all_until_last_element) + "/statistics_" + val_select1;
+	        url += "?";
+	        if (val_select2 != "") {
+	        	url += val_select1 + "=" + val_select2+"&";
+	        }
+	        else
+        	{
+	        	url+=val_select1+"=all&";
+	       	}
+	        url+="from_y="+from_y
+	         	+"&from_m="+from_m
+	         	+"&to_y="+to_y
+	      		+"&to_m="+to_m;
+	
+	        window.location.href = url;
+    	}
     }
     
     function getParameterByName(name) {
@@ -65,7 +87,21 @@
     }
 
     function build_initial_selects() {
+
+    	//retrieve the dropdown values passed in the request (for retaining the selections)
+    	try
+		{
+			qs_user="${selectedUser}";
+			qs_affil="${selectedAffiliation}";
+			qs_project="${selectedProject}";
+		}
+		catch(e)
+		{
+			alert("e:"+e.description);
+		}
+
 		var options = "";
+		var selected_id="";
     	if (qs_user != "") {
     		options = "<option value='affiliation'>Affiliation</option>";
     		options += "<option value='project'>Project</option>";
@@ -81,33 +117,38 @@
     	}
 		$("#select1").html(options);
 
-		options = "<option value='all'>All</option>";
+		options = "<option id=\"all\" value='all'>All</option>";
 		if (qs_user != "") {
 			for (var i=0; i<users.length; i++) {
-				var sel = "";
-				if (qs_user == users[i][0]) {
-					sel = "selected=\"selected\"";
-				}
-				options += "<option " + sel + " value='" + users[i][0] + "'>" + users[i][1] + "</option>";
+				options += "<option id=\"" + users[i][0] + "\" value='" + users[i][0] + "'>" + users[i][1] + "</option>";
 			}
-		} else if (qs_project != "") {
-			for (var i=0; i<projects.length; i++) {
-				var sel = "";
-				if (qs_project == projects[i]) {
-					sel = "selected=\"selected\"";
-				}
-				options += "<option " + sel + " value='" + projects[i] + "'>" + projects[i] + "</option>";
+			selected_id=qs_user;			
+		} 
+		else if (qs_project != "") {
+			for(var i=0;i<projects[i].length;i++)
+			{
+				options += "<option id=\"" + projects[i] + "\" value='" + projects[i] + "'>" + projects[i] + "</option>";
 			}
-		} else {
-			for (var i=0; i<affils.length; i++) {
-				var sel = "";
-				if (qs_affil == affils[i]) {
-					sel = "selected=\"selected\"";
-				}
-				options += "<option " + sel + " value='" + affils[i] + "'>" + affils[i] + "</option>";
+			selected_id=qs_project;
+		} 
+		else 
+		{
+			for(var i=0;i<affils.length;i++)
+			{
+				//removing the "/" characters while assigning an id to an option
+				options += "<option id=\""+affils[i].split('/').join('')+"\" value='" + affils[i] + "'>" + affils[i] + "</option>";
 			}
+			selected_id = qs_affil.split('/').join('');
 		}
-		$("#select2").html(options);    	
+		$("#select2").html(options);  
+		if(selected_id!="")
+			document.getElementById(selected_id).selected="true";
+
+		//set the dropdown values to the ones obtained in the response 
+		document.getElementById("select_from_month").options.selectedIndex=${startMonth};
+		document.getElementById("select_to_month").options.selectedIndex=${endMonth};
+		document.getElementById("to_"+"${endYear}").selected="true";
+		document.getElementById("from_"+"${startYear}").selected="true";
     }
     
 	function adjust_select2() {
@@ -128,7 +169,7 @@
 		}
 		$("#select2").html(options);
 	}
-	
+
     $(document).ready(function() {
     	build_initial_selects();
         $("#statistics").tablesorter({widgets:['zebra'], sortList:[[4,1]]});
@@ -159,6 +200,50 @@
       <option value="${tmp}">${tmp}</option>
     </c:forEach>  
   </select>
+  
+  From
+  <select id="select_from_month" >
+  	<option value="0">January</option>
+  	<option value="1" >February</option>
+  	<option value="2" >March</option>
+  	<option value="3" >April</option>
+  	<option value="4" >May</option>
+  	<option value="5" >June</option>
+  	<option value="6" >July</option>
+  	<option value="7" >August</option>
+  	<option value="8" >September</option>
+  	<option value="9" >October</option>
+  	<option value="10" >November</option>
+  	<option value="11" >December</option>
+  </select>
+  
+  <select id="select_from_year">
+  	<c:forEach items="${years}" var="tmp">
+  		<option id="from_${tmp}" value="${tmp}">${tmp}</option>
+  	</c:forEach>
+  </select>  
+
+  To
+  <select id="select_to_month">
+  	<option value="0">January</option>
+  	<option value="1">February</option>
+  	<option value="2">March</option>
+  	<option value="3">April</option>
+  	<option value="4">May</option>
+  	<option value="5">June</option>
+  	<option value="6">July</option>
+  	<option value="7">August</option>
+  	<option value="8">September</option>
+  	<option value="9">October</option>
+  	<option value="10">November</option>
+  	<option value="11">December</option>
+  </select>
+  
+  <select id="select_to_year">
+  	<c:forEach items="${years}" var="tmp">
+  		<option id="to_${tmp}" value="${tmp}">${tmp}</option>
+  	</c:forEach>
+  </select>    
   
   <button type="button" onClick="get_data()">Go!</button> 
    
