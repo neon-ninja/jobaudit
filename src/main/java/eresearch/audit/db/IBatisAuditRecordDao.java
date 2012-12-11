@@ -133,4 +133,12 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		this.executorService = executorService;
 	}
 
+	public Future<List<String>> getAuditYears() throws Exception {
+		return this.executorService.submit(new Callable<List<String>>() {
+			public List<String> call() throws Exception {
+				return getSqlMapClientTemplate().queryForList("getAuditYears");
+			}
+		});
+	}
+
 }

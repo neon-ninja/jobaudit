@@ -13,8 +13,16 @@ public class StatisticsAffiliationController extends StatisticsUserController {
 		Map params = req.getParameterMap();
 		List<String> users = new LinkedList<String>();
 		Future<List<String>> fuserlist = null;
+		
+		setHistoryStartYear(Integer.parseInt(((String[]) params.get("from_y"))[0]));
+		setHistoryStartMonth(Integer.parseInt(((String[]) params.get("from_m"))[0]));
+		setHistoryEndYear(Integer.parseInt(((String[]) params.get("to_y"))[0]));
+		setHistoryEndMonth(Integer.parseInt(((String[]) params.get("to_m"))[0]));
+		
 		if (params.containsKey("affiliation")) {
 			String affil = ((String[]) params.get("affiliation"))[0];
+			setSelectedAffiliation(affil);
+			
 			String[] subs = affil.split("/");
 			List<String> usersWithAtLeastOneJob = this.userDao.getUserNames().get();
 			if (affil.equals("all")) {
