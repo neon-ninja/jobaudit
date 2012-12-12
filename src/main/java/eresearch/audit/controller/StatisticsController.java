@@ -1,5 +1,6 @@
 package eresearch.audit.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 import javax.servlet.http.HttpServletRequest;
@@ -33,12 +34,19 @@ public class StatisticsController extends AbstractController {
 		Future<List<User>> fuser = this.userDao.getUsers();
 		Future<List<String>> faffil = this.userDao.getAffiliations();
 		Future<List<String>> fproys = this.auditRecordDao.getProjectNames();
-		Future<List<String>> fyears = this.auditRecordDao.getAuditYears();
-
+		//Future<List<String>> fyears = this.auditRecordDao.getAuditYears();
+		
+		List<String> fyears = new ArrayList<String>();
+		for(int year=historyStartYear; year<=historyEndYear;year++)
+		{
+			fyears.add(""+year);
+		}
+		
 		mav.addObject("users", fuser.get());
 		mav.addObject("affiliations", faffil.get());
 		mav.addObject("projects", fproys.get());
-		mav.addObject("years", fyears.get());
+		
+		mav.addObject("years", fyears);
 
 		//for retaining drop-down values in UI
 		mav.addObject("startYear", historyStartYear);
