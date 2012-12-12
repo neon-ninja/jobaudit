@@ -6,11 +6,22 @@
 <sqlMap namespace="ibatis_queries">
 
    <!-- get list of users that submitted at least 1 job -->
-   <select id="getUsersWithAtLeastOneJob" resultClass="java.lang.String">
+   <select id="getUsersWithAtLeastOneJob"  resultClass="java.lang.String">
        SELECT DISTINCT
          user
        FROM audit
+   </select>
+   
+      <!-- get list of users that submitted at least 1 job in the specified time interval-->
+   <select id="getUsersWithAtLeastOneJobInterval" parameterClass="java.util.Map" resultClass="java.lang.String">
+       <![CDATA[
+       SELECT DISTINCT
+         user
+       FROM audit
+       WHERE done>=#bottom# AND
+       done<#top#
        ORDER BY user
+       ]]>
    </select>
    
    <!-- get information about user -->

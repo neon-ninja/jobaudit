@@ -1,5 +1,6 @@
 package eresearch.audit.controller;
 
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -14,17 +15,19 @@ public class StatisticsAffiliationController extends StatisticsUserController {
 		List<String> users = new LinkedList<String>();
 		Future<List<String>> fuserlist = null;
 		
-		setHistoryStartYear(Integer.parseInt(((String[]) params.get("from_y"))[0]));
-		setHistoryStartMonth(Integer.parseInt(((String[]) params.get("from_m"))[0]));
-		setHistoryEndYear(Integer.parseInt(((String[]) params.get("to_y"))[0]));
-		setHistoryEndMonth(Integer.parseInt(((String[]) params.get("to_m"))[0]));
+		// get data for bar diagrams
+		Calendar from = Calendar.getInstance();
+		Calendar to= Calendar.getInstance();
+		
+		from.set(super.historyStartYear, super.historyStartMonth, 1,0,0,0);
+		to.set(super.historyEndYear, super.historyEndMonth+1, 1,0,0,0);
 		
 		if (params.containsKey("affiliation")) {
 			String affil = ((String[]) params.get("affiliation"))[0];
 			setSelectedAffiliation(affil);
 			
 			String[] subs = affil.split("/");
-			List<String> usersWithAtLeastOneJob = this.userDao.getUserNames().get();
+			List<String> usersWithAtLeastOneJob = this.userDao.getUserNames(""+(from.getTimeInMillis()/1000),""+(to.getTimeInMillis()/1000)).get();
 			if (affil.equals("all")) {
 				return usersWithAtLeastOneJob;
 			} else {

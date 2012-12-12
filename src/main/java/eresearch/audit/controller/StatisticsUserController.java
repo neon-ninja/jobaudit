@@ -24,21 +24,36 @@ public class StatisticsUserController extends StatisticsController {
 		List<BarDiagramStatistics> bdslist = new LinkedList<BarDiagramStatistics>();
 		List<Future<UserStatistics>> uslist = new LinkedList<Future<UserStatistics>>();
 
-		// get statistics for each user
-		List<String> userlist = this.createUserList(request);
-		for (String user: userlist) {
-			uslist.add(this.auditRecordDao.getStatisticsForUser(user, "0", new Long(new Date().getTime()/1000).toString()));
-		}
+		Map params = request.getParameterMap();
+		
+		setHistoryStartYear(Integer.parseInt(((String[]) params.get("from_y"))[0]));
+		setHistoryStartMonth(Integer.parseInt(((String[]) params.get("from_m"))[0]));
+		setHistoryEndYear(Integer.parseInt(((String[]) params.get("to_y"))[0]));
+		setHistoryEndMonth(Integer.parseInt(((String[]) params.get("to_m"))[0]));
 		
 		// get data for bar diagrams
 		Calendar from = Calendar.getInstance();
 		Calendar to= Calendar.getInstance();
-		int month = super.historyStartMonth - 1;
 
+		// get statistics for each user
+		List<String> userlist = this.createUserList(request);
+		//String top = (from.getTimeInMillis()/1000)
+		
 		//time period related changes		
-		from.set(super.historyStartYear, super.historyStartMonth, 1);
-		to.set(super.historyEndYear, super.historyEndMonth, 1);
-
+		from.set(super.historyStartYear, super.historyStartMonth, 1,0,0,0);
+		to.set(super.historyEndYear, super.historyEndMonth+1, 1,0,0,0);
+		
+		String low =  ""+(from.getTimeInMillis()/1000);
+		String high = ""+(to.getTimeInMillis()/1000);
+		
+		for (String user: userlist) {
+			uslist.add(this.auditRecordDao.getStatisticsForUser(user, low, high));
+	//		uslist.add(this.auditRecordDao.getStatisticsForUser(user, "0", ""+System.currentTimeMillis()/1000));
+		}
+		
+		to.set(super.historyEndYear, super.historyEndMonth, 1,0,0,0);
+		int month = super.historyStartMonth - 1;
+		
 		while ((from.get(Calendar.YEAR) <= to.get(Calendar.YEAR) && !(from.get(Calendar.YEAR) == to.get(Calendar.YEAR) && from.get(Calendar.MONTH) > to.get(Calendar.MONTH)))) {
         	long bottom = from.getTimeInMillis()/1000;
             from.set(this.historyStartYear, month+1, 1, 0, 0, 0);
@@ -79,25 +94,34 @@ public class StatisticsUserController extends StatisticsController {
 	protected List<String> createUserList(HttpServletRequest req) throws Exception {
 		Map params = req.getParameterMap();
 		List<String> users = new LinkedList<String>();
-		
-		setHistoryStartYear(Integer.parseInt(((String[]) params.get("from_y"))[0]));
-		setHistoryStartMonth(Integer.parseInt(((String[]) params.get("from_m"))[0]));
-		setHistoryEndYear(Integer.parseInt(((String[]) params.get("to_y"))[0]));
-		setHistoryEndMonth(Integer.parseInt(((String[]) params.get("to_m"))[0]));
-		
+				
 		String user=((String[]) params.get("user"))[0];
 		
 		if (params.containsKey("user")) 
 		{
 			if (user.equalsIgnoreCase("all")) {
-				users.addAll(super.userDao.getUserNames().get());
+				Calendar from = Calendar.getInstance();
+				Calendar to= Calendar.getInstance();
+
+				from.set(super.historyStartYear, super.historyStartMonth, 1,0,0,0);
+				to.set(super.historyEndYear, super.historyEndMonth+1, 1,0,0,0);
+			
+				users.addAll(super.userDao.getUserNames(""+(from.getTimeInMillis()/1000),""+(to.getTimeInMillis()/1000)).get());				
 			} else {
 				users.add(user);
 			}
 			setSelectedUser(user);
-		} else {
-		// list of all user names
-			users.addAll(super.userDao.getUserNames().get());
+		} 
+		else 
+		{
+			Calendar from = Calendar.getInstance();
+			Calendar to= Calendar.getInstance();
+
+			from.set(super.historyStartYear, super.historyStartMonth, 1,0,0,0);
+			to.set(super.historyEndYear, super.historyEndMonth+1, 1,0,0,0);
+			
+			// list of all user names
+			users.addAll(super.userDao.getUserNames(""+(from.getTimeInMillis()/1000),""+(to.getTimeInMillis()/1000)).get());
 		}
 		return users;
 	}
