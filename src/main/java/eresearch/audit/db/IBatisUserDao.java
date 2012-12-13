@@ -51,11 +51,14 @@ public class IBatisUserDao extends SqlMapClientDaoSupport implements UserDao {
 		);
 	}
 
-	public Future<List<String>> getUserNames() throws Exception {
+	public Future<List<String>> getUserNames(final String bottom, final String top) throws Exception {
 		return this.executorService.submit(
 			new Callable<List<String>>() {
 				public List<String> call() throws Exception {
-					return getSqlMapClientTemplate().queryForList("getUsersWithAtLeastOneJob");
+					Map<String,Object> params=new HashMap<String, Object>();
+					params.put("top", top);
+					params.put("bottom", bottom);
+					return getSqlMapClientTemplate().queryForList("getUsersWithAtLeastOneJobInterval", params);
 				}
 			}
 		);

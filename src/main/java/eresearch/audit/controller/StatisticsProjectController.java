@@ -18,19 +18,29 @@ public class StatisticsProjectController extends StatisticsController {
 		HttpServletResponse response) throws Exception {
     	
 		ModelAndView mav = super.handleRequestInternal(request, response);
+		
+		Map params = request.getParameterMap();
+		setHistoryStartYear(Integer.parseInt(((String[]) params.get("from_y"))[0]));
+		setHistoryStartMonth(Integer.parseInt(((String[]) params.get("from_m"))[0]));
+		setHistoryEndYear(Integer.parseInt(((String[]) params.get("to_y"))[0]));
+		setHistoryEndMonth(Integer.parseInt(((String[]) params.get("to_m"))[0]));
+		
 		List<String> projects = this.createProjectList(request, mav);
 		Future<List<UserStatistics>> fprojectstats;
-		
-		fprojectstats = this.auditRecordDao.getStatisticsForProjectSet(projects, "0", new Long(new Date().getTime()/1000).toString());
-		List<Future<BarDiagramStatistics>> fbdslist = new LinkedList<Future<BarDiagramStatistics>>();
-		List<BarDiagramStatistics> bdslist = new LinkedList<BarDiagramStatistics>();
 
 		Calendar from = Calendar.getInstance();
 		Calendar to= Calendar.getInstance();
-		int month = super.historyStartMonth - 1;
-		
+	
 		from.set(super.historyStartYear, super.historyStartMonth, 1);
-		to.set(super.historyEndYear, super.historyEndMonth, 1);
+		to.set(super.historyEndYear, super.historyEndMonth+1, 1);		
+		
+		fprojectstats = this.auditRecordDao.getStatisticsForProjectSet(projects, ""+(from.getTimeInMillis()/1000), ""+(to.getTimeInMillis()/1000));
+		
+		List<Future<BarDiagramStatistics>> fbdslist = new LinkedList<Future<BarDiagramStatistics>>();
+		List<BarDiagramStatistics> bdslist = new LinkedList<BarDiagramStatistics>();
+
+		to.set(super.historyEndYear, super.historyEndMonth, 1);	
+		int month = super.historyStartMonth - 1;
 
 		while ((from.get(Calendar.YEAR) <= to.get(Calendar.YEAR) && !(from.get(Calendar.YEAR) == to.get(Calendar.YEAR) && from.get(Calendar.MONTH) > to.get(Calendar.MONTH)))) {
         	long bottom = from.getTimeInMillis()/1000;
@@ -40,11 +50,11 @@ public class StatisticsProjectController extends StatisticsController {
 		    month += 1;
 		    from.set(this.historyStartYear, month, 1, 0, 0, 0);
 		}
-
         for (Future<BarDiagramStatistics> fbds : fbdslist) {
         	bdslist.add(fbds.get());
         }
 		mav.addObject("user_statistics", fprojectstats.get());
+		
 		mav.addObject("job_statistics", bdslist);
 
 		mav.addObject("startYear", historyStartYear);
@@ -56,7 +66,6 @@ public class StatisticsProjectController extends StatisticsController {
 		mav.addObject("selectedProject", selectedProject);
 		mav.addObject("selectedUser", selectedUser);
 		mav.addObject("selectedAffiliation", selectedAffiliation);
-
 	    return mav;
 	}
 
@@ -64,12 +73,12 @@ public class StatisticsProjectController extends StatisticsController {
 			ModelAndView mav) throws Exception {
 		Map params = req.getParameterMap();
 		List<String> projects = new LinkedList<String>();
-
+/*
 		setHistoryStartYear(Integer.parseInt(((String[]) params.get("from_y"))[0]));
 		setHistoryStartMonth(Integer.parseInt(((String[]) params.get("from_m"))[0]));
 		setHistoryEndYear(Integer.parseInt(((String[]) params.get("to_y"))[0]));
 		setHistoryEndMonth(Integer.parseInt(((String[]) params.get("to_m"))[0]));
-
+*/
 		String project = ((String[]) params.get("project"))[0];
 		if (params.containsKey("project")) {
 			if (project.equalsIgnoreCase("all")) {
