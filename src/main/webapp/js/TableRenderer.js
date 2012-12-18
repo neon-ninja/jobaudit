@@ -49,9 +49,16 @@ function TableRenderer(divId, columnNames) {
     		    	var nodes = rowList[i][columnNames[j]];
     		        var machine_string = rowList[i]["processors"];
     		        var machines = machine_string.split(",").sort();
+    		        var MAX_MACHINES = 5;
     		        var tooltip = '';
     		        for (var k=0; k<machines.length; k++) {
     		        	tooltip += machines[k] + '\n';
+    		        	if (k >= MAX_MACHINES-1) {
+    		        		break;
+    		        	}
+    		        }
+    		        if (machines.length > MAX_MACHINES) {
+    		        	tooltip += "...\n";
     		        }
     		        tmp += '<td><div title="' + tooltip + '">' + nodes + '</div></td>';    		    
     		    } else {
