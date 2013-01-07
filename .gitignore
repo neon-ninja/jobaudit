@@ -13,5 +13,6 @@ target
 .metadata
 .project
 .settings
+pom.xml
 
 configuration.properties

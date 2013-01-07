@@ -1,16 +1,20 @@
 package eresearch.audit.controller;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 public class StatisticsAffiliationController extends StatisticsUserController {
 
+	static Logger log = Logger.getLogger("StatisticsAffiliationController.class");
 	protected List<String> createUserList(HttpServletRequest req) throws Exception {
+		log.info("Inside createUserList");
 		Map params = req.getParameterMap();
 		List<String> users = new LinkedList<String>();
 		Future<List<String>> fuserlist = null;
@@ -48,6 +52,7 @@ public class StatisticsAffiliationController extends StatisticsUserController {
 				}
 			}
 		}
+		log.info("Returning from createUserList. list size="+users.size());
 		return users;
 	}
 }

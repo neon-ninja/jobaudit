@@ -1,5 +1,7 @@
 package eresearch.audit.db;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,20 +43,100 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		);
 	}
 	
-	public Future<UserStatistics> getStatisticsForUser(final String uid, final String bottom, final String top) throws Exception {
+	public Future<List<UserStatistics>> getStatisticsForUser(final List<String> userlist, final Calendar from, final Calendar to) throws Exception {
+		String high = ""+(to.getTimeInMillis()/1000);
+		String mid = null;
+		
+		int currMonth = new GregorianCalendar().get(Calendar.MONTH);
+		int currYear = new GregorianCalendar().get(Calendar.YEAR);
+		String mmFrom=null;
+		String mmTo=null;
+		
+		//if the selected date range overlaps with past 24 hours' time span
+		if((to.getTimeInMillis())>(System.currentTimeMillis()-86400000)){
+			mid=""+((System.currentTimeMillis()-86400000)/1000);
+
+			Calendar newTo = Calendar.getInstance();
+			newTo.set(currYear, currMonth-1, 1, 0, 0, 0);
+			Calendar curr=Calendar.getInstance();
+			curr.set(currYear, currMonth, 1, 0, 0, 0);
+			
+			mmFrom=""+(from.get(Calendar.MONTH)+1);
+			mmTo=""+(newTo.get(Calendar.MONTH)+1);
+			
+			return getStatisticsForUser(userlist, ""+(curr.getTimeInMillis()/1000), mid, high,""+from.get(Calendar.YEAR)+(mmFrom.length()==1?"0"+mmFrom:mmFrom), ""+newTo.get(Calendar.YEAR)+(mmTo.length()==1?"0"+mmTo:mmTo));
+		}
+		else{
+			mmFrom=""+(from.get(Calendar.MONTH)+1);
+			mmTo=""+(to.get(Calendar.MONTH));
+			return getStatisticsForUser(userlist, ""+from.get(Calendar.YEAR)+(mmFrom.length()==1?"0"+mmFrom:mmFrom), ""+to.get(Calendar.YEAR)+(mmTo.length()==1?"0"+mmTo:mmTo));
+		}
+	}	
+
+	//get statistics for data older than 24 hours
+	public Future<List<UserStatistics>> getStatisticsForUser(final List<String> users, final String bottom, final String top) throws Exception {
 		return this.executorService.submit(
-			new Callable<UserStatistics>() {
-				public UserStatistics call() throws Exception {
+			new Callable<List<UserStatistics>>() {
+				public List<UserStatistics> call() throws Exception {
 					Map<String,Object> params = new HashMap<String,Object>();
 					params.put("bottom", bottom);
 					params.put("top", top);
-					params.put("upi", uid);
-					return (UserStatistics) getSqlMapClientTemplate().queryForObject("getStatisticsForUser", params);
+					params.put("users", users);
+					return (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForUser", params);
+				}
+			}
+		);
+	}
+	
+	//get statisctics for past 24 hours' data
+	public Future<List<UserStatistics>> getStatisticsForUser(final List<String> users, final String bottom, final String mid, final String top, final String start, final String end) throws Exception {
+		return this.executorService.submit(
+			new Callable<List<UserStatistics>>() {
+				public List<UserStatistics> call() throws Exception {
+					Map<String,Object> params = new HashMap<String,Object>();
+					params.put("bottom", bottom);
+					params.put("mid", mid);
+					params.put("top", top);
+					params.put("users", users);
+					params.put("start", start);
+					params.put("end", end);
+					return (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForUserLatest", params);
 				}
 			}
 		);
 	}
 
+	public Future<List<UserStatistics>> getStatisticsForProjectSet(final List<String> projects, final Calendar from, final Calendar to) throws Exception {
+		String high = ""+(to.getTimeInMillis()/1000);
+		String mid = null;
+		
+		int currMonth = new GregorianCalendar().get(Calendar.MONTH);
+		int currYear = new GregorianCalendar().get(Calendar.YEAR);
+		String mmFrom=null;
+		String mmTo=null;
+		
+		//if the selected date range overlaps with past 24 hours' time span
+		if((to.getTimeInMillis())>(System.currentTimeMillis()-86400000)){
+			mid=""+((System.currentTimeMillis()-86400000)/1000);
+
+			Calendar newTo = Calendar.getInstance();
+			newTo.set(currYear, currMonth-1, 1, 0, 0, 0);
+			Calendar curr=Calendar.getInstance();
+			curr.set(currYear, currMonth, 1, 0, 0, 0);
+			
+			mmFrom=""+(from.get(Calendar.MONTH)+1);
+			mmTo=""+(newTo.get(Calendar.MONTH)+1);
+			
+			return getStatisticsForProjectSet(projects, ""+(curr.getTimeInMillis()/1000), mid, high,""+from.get(Calendar.YEAR)+(mmFrom.length()==1?"0"+mmFrom:mmFrom), ""+newTo.get(Calendar.YEAR)+(mmTo.length()==1?"0"+mmTo:mmTo));
+		}
+		else{
+			mmFrom=""+(from.get(Calendar.MONTH)+1);
+			mmTo=""+(to.get(Calendar.MONTH));
+			return getStatisticsForProjectSet(projects, ""+from.get(Calendar.YEAR)+(mmFrom.length()==1?"0"+mmFrom:mmFrom), ""+to.get(Calendar.YEAR)+(mmTo.length()==1?"0"+mmTo:mmTo));
+		}
+	}	
+	
+	//get statistics for data older than 24 hours
 	public Future<List<UserStatistics>> getStatisticsForProjectSet(final List<String> projects, final String bottom, final String top) throws Exception {
 		return this.executorService.submit(
 			new Callable<List<UserStatistics>>() {
@@ -63,12 +145,31 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 					params.put("bottom", bottom);
 					params.put("top", top);
 					params.put("projects", projects);
-					return getSqlMapClientTemplate().queryForList("getStatisticsForProjectSet", params);
+					return (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForProjectSet", params);
 				}
 			}
 		);
 	}
 
+	//get statistics for past 24 hours' data
+	public Future<List<UserStatistics>> getStatisticsForProjectSet(final List<String> projects, final String bottom, final String mid, final String top, final String start, final String end) throws Exception {
+		return this.executorService.submit(
+			new Callable<List<UserStatistics>>() {
+				public List<UserStatistics> call() throws Exception {
+					Map<String,Object> params = new HashMap<String,Object>();
+					params.put("bottom", bottom);
+					params.put("mid", mid);
+					params.put("top", top);
+					params.put("projects", projects);
+					params.put("start", start);
+					params.put("end", end);
+					return (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForProjectSetLatest", params);
+				}
+			}
+		);
+	}
+
+	//get bar diagram statistics for data up to previous month
 	public Future<BarDiagramStatistics> getBarDiagramStatisticsForAllUsers(final String bottom, final String top) throws Exception {
 		return this.executorService.submit(
 			new Callable<BarDiagramStatistics>() {
@@ -84,40 +185,88 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 			}
 		);
 	}
-
+	
+	//get bar diagram statistics for current month's data
+	public Future<BarDiagramStatistics> getBarDiagramStatisticsForUserSetCurr(final List<String> uids, final String bottom, final String mid, final String top) throws Exception {
+		return this.executorService.submit(
+			new Callable<BarDiagramStatistics>() {
+				public BarDiagramStatistics call() throws Exception {
+					Map<String,Object> params = new HashMap<String,Object>();
+					params.put("bottom", bottom);
+					params.put("top", top);
+					params.put("mid", mid);
+					params.put("uids", uids);
+					BarDiagramStatistics bds = (BarDiagramStatistics) getSqlMapClientTemplate().queryForObject("getBarDiagramStatisticsForUserSetForIntervalCurr", params);
+					bds.setBottom(Integer.parseInt(bottom));
+					bds.setTop(Integer.parseInt(top));
+					return bds;
+				}
+			}
+		);
+	}
+	
 	public Future<BarDiagramStatistics> getBarDiagramStatisticsForUserSet(final List<String> uids, final String bottom, final String top) throws Exception {
 		return this.executorService.submit(
 			new Callable<BarDiagramStatistics>() {
 				public BarDiagramStatistics call() throws Exception {
 					Map<String,Object> params = new HashMap<String,Object>();
-					params.put("bottom", bottom);
-					params.put("top", top);
+					params.put("bottom", (bottom.length()==1?"0"+bottom:bottom));
+					params.put("top", (top.length()==1?"0"+top:top));
 					params.put("uids", uids);
 					BarDiagramStatistics bds = (BarDiagramStatistics) getSqlMapClientTemplate().queryForObject("getBarDiagramStatisticsForUserSetForInterval", params);
-					bds.setBottom(Integer.parseInt(bottom));
-					bds.setTop(Integer.parseInt(top));
+					int month = Integer.parseInt(bottom);
+					int year = Integer.parseInt(top);
+					Calendar cal= Calendar.getInstance();
+					cal.set(year, month-1, 1, 0, 0, 0);
+					bds.setBottom(Integer.parseInt(""+(cal.getTimeInMillis()/1000)));
+					cal.set(year, month, 1, 0, 0, 0);
+					bds.setTop(Integer.parseInt(""+(cal.getTimeInMillis()/1000)));
 					return bds;
 				}
 			}
 		);
 	}
-
+	
 	public Future<BarDiagramStatistics> getBarDiagramStatisticsForProjectSet(final List<String> projects, final String bottom, final String top) throws Exception {
 		return this.executorService.submit(
 			new Callable<BarDiagramStatistics>() {
 				public BarDiagramStatistics call() throws Exception {
 					Map<String,Object> params = new HashMap<String,Object>();
-					params.put("bottom", bottom);
-					params.put("top", top);
+					params.put("bottom", (bottom.length()==1?"0"+bottom:bottom));
+					params.put("top", (top.length()==1?"0"+top:top));
 					params.put("projects", projects);
 					BarDiagramStatistics bds = (BarDiagramStatistics) getSqlMapClientTemplate().queryForObject("getBarDiagramStatisticsForProjectSetForInterval", params);
+					int month = Integer.parseInt(bottom);
+					int year = Integer.parseInt(top);
+					Calendar cal= Calendar.getInstance();
+					cal.set(year, month-1, 1, 0, 0, 0);
+					bds.setBottom(Integer.parseInt(""+(cal.getTimeInMillis()/1000)));
+					cal.set(year, month, 1, 0, 0, 0);
+					bds.setTop(Integer.parseInt(""+(cal.getTimeInMillis()/1000)));
+					return bds;
+				}
+			}
+		);
+	}
+	
+	//get bar diagram statistics for current month's data
+	public Future<BarDiagramStatistics> getBarDiagramStatisticsForProjectSetCurr(final List<String> projects, final String bottom, final String mid, final String top) throws Exception {
+		return this.executorService.submit(
+				new Callable<BarDiagramStatistics>() {
+					public BarDiagramStatistics call() throws Exception {
+						Map<String,Object> params = new HashMap<String,Object>();
+						params.put("bottom", bottom);
+						params.put("top", top);
+					params.put("mid", mid);
+					params.put("projects", projects);
+					BarDiagramStatistics bds = (BarDiagramStatistics) getSqlMapClientTemplate().queryForObject("getBarDiagramStatisticsForProjectSetForIntervalCurr", params);
 					bds.setBottom(Integer.parseInt(bottom));
 					bds.setTop(Integer.parseInt(top));
 					return bds;
 				}
 			}
 		);
-	}
+	}	
 
 	public Future<List<String>> getProjectNames() throws Exception {
 		return this.executorService.submit(

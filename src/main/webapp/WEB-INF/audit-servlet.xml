@@ -23,9 +23,9 @@
 	    <property name="historyStartMonth" value="${history.start.month}"/>
 	    <property name="historyEndYear" value="${history.end.year}"/>
 	    <property name="historyEndMonth" value="${history.end.month}"/>
-<!-- 	    <property name="selectedUser" value="1"/> -->
-<!-- 	    <property name="selectedProject" value="1"/> -->
-<!-- 	    <property name="selectedAffiliation" value="1"/> -->
+	    <property name="startYear" value="${history.start.year}"/>
+	    <property name="endYear" value="${history.end.year}"/>
+
 	</bean>
 	<bean id="statisticsUserController" class="eresearch.audit.controller.StatisticsUserController">
 	    <property name="userDao" ref="userDao"/>
@@ -37,6 +37,8 @@
 	    <property name="selectedUser" value=""/>
 	    <property name="selectedProject" value=""/>
 	    <property name="selectedAffiliation" value=""/>	    
+	    <property name="startYear" value="${history.start.year}"/>
+	    <property name="endYear" value="${history.end.year}"/>
 	</bean>
 	<bean id="statisticsAffiliationController" class="eresearch.audit.controller.StatisticsAffiliationController">
 	    <property name="userDao" ref="userDao"/>
@@ -47,7 +49,9 @@
 	    <property name="historyEndMonth" value="${history.end.month}"/>
 	    <property name="selectedUser" value=""/>
 	    <property name="selectedProject" value=""/>
-	    <property name="selectedAffiliation" value=""/>	    	    
+	    <property name="selectedAffiliation" value=""/>	 
+   	    <property name="startYear" value="${history.start.year}"/>
+	    <property name="endYear" value="${history.end.year}"/>   	    
 	</bean>
 	<bean id="statisticsProjectController" class="eresearch.audit.controller.StatisticsProjectController">
 	    <property name="userDao" ref="userDao"/>
@@ -58,7 +62,9 @@
 	    <property name="historyEndMonth" value="${history.end.month}"/>
 	    <property name="selectedUser" value=""/>
 	    <property name="selectedProject" value=""/>
-	    <property name="selectedAffiliation" value=""/>	    	    
+	    <property name="selectedAffiliation" value=""/>	    
+	    <property name="startYear" value="${history.start.year}"/>
+	    <property name="endYear" value="${history.end.year}"/>	    	    
 	</bean>
 	<bean id="userRecordController" class="eresearch.audit.controller.UserRecordController">
 	    <property name="userDao" ref="userDao"/>

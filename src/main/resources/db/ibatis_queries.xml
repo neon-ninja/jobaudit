@@ -13,16 +13,18 @@
    </select>
    
       <!-- get list of users that submitted at least 1 job in the specified time interval-->
+<!--       using audit table leads to some improper usage of indices when running the query  -->
+<!--       (ignore index(user_index) improves the performance, but using audit_user gives the results quicker) -->
    <select id="getUsersWithAtLeastOneJobInterval" parameterClass="java.util.Map" resultClass="java.lang.String">
        <![CDATA[
        SELECT DISTINCT
          user
        FROM audit
-       WHERE done>=#bottom# AND
-       done<#top#
-       ORDER BY user
        ]]>
    </select>
+<!--        WHERE done>=#bottom# AND -->
+<!--        done<#top# -->
+<!--        ORDER BY user -->
    
    <!-- get information about user -->
    <select id="getUser" parameterClass="java.lang.String" resultClass="eresearch.audit.pojo.User">
@@ -138,93 +140,283 @@
        LIMIT #offset#,#amount#
    </select>
 
-   <!-- get statistics for user -->
    <select id="getStatisticsForUser" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.UserStatistics">
      <![CDATA[
-       SELECT
-         user AS user,
-         count(*) AS jobs,
-         SUM(IF(executable like '%.globus%', 1, 0)) AS grid_jobs,
-         sum(cores) AS total_cores,
-         TRUNCATE(SUM(IF(done>start, cores*(done-start), 0))/3600, 2) AS total_core_hours,
-         TRUNCATE(SUM(IF(done>start, IF(executable like '%.globus%', cores*(done-start), 0),0))/3600, 2) AS total_grid_core_hours,
-         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600, 2) AS total_waiting_time,
-         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600/count(*), 2) AS average_waiting_time
-       FROM audit 
-       WHERE done>=#bottom# AND
-             done<#top# AND
-             user = #upi# 
-
+		select user,
+		sum(jobs) as jobs,
+		sum(grid_jobs) as grid_jobs,
+		sum(total_cores) as total_cores,
+		truncate(sum(core_hours),2) as total_core_hours,
+		truncate(sum(total_grid_core_hours),2) as total_grid_core_hours,
+		truncate(sum(waiting_time),2) as total_waiting_time,
+		(sum(waiting_time)/sum(jobs)) as average_waiting_time 
+		from audit_user_prev 
+		where 
+		concat_ws('', year, month) between #bottom# and #top# and
+             
      ]]>
-   </select>
+       user IN <iterate property="users" open="(" close=")" conjunction=","> #users[]# </iterate>
+       group by user
+   </select> 
    
-   <!-- get statistics for a set of projects for a set of users -->
+   <select id="getStatisticsForUserLatest" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.UserStatistics">
+   	<![CDATA[
+		   SELECT 
+		  user ,
+		  SUM(jobs) AS jobs,
+		  SUM(grid_jobs) AS grid_jobs,
+		  SUM(total_cores) AS total_cores,
+		  truncate(SUM(total_core_hours),2) AS total_core_hours,
+		  truncate(SUM(total_grid_core_hours),2) AS total_grid_core_hours,
+		  truncate(SUM(total_waiting_time),2) AS total_waiting_time,
+		  AVG(average_waiting_time) as average_waiting_time
+		FROM
+		(
+
+	select user,
+		sum(jobs) as jobs,
+		sum(grid_jobs) as grid_jobs,
+		sum(total_cores) as total_cores,
+		sum(core_hours) as total_core_hours,
+		sum(total_grid_core_hours) as total_grid_core_hours,
+		sum(waiting_time) as total_waiting_time,
+		(sum(waiting_time)/sum(jobs)) as average_waiting_time
+		from audit_user_prev 
+		where 
+		concat_ws('', year, month) between #start# and #end#
+       group by user		
+       
+       union
+		
+		  select user, 
+		   count(*) as jobs,
+		  sum(if(executable like '%.globus%', 1, 0)) as grid_jobs,
+		  sum(cores) as total_cores,
+		         truncate(sum(core_hours), 2) as total_core_hours,
+		         truncate(sum(if(executable like '%.globus%', core_hours, 0)), 2) as total_grid_core_hours,
+		         truncate(sum(waiting_time), 2) as total_waiting_time,
+		         truncate(avg(waiting_time), 2) as average_waiting_time
+		  from audit_user
+		   where done >= #bottom# and done < #mid# 
+		  group by user
+		  
+		  union
+		   
+		  select user,
+		   count(*) as jobs,
+		  sum(if(executable like '%.globus%', 1, 0)) as grid_jobs,
+		  sum(cores) as total_cores,
+		         truncate(sum(if(done>start, cores*(done-start), 0))/3600, 2) as total_core_hours,
+		         truncate(sum(if(done>start, if(executable like '%.globus%', cores*(done-start), 0),0))/3600, 2) as total_grid_core_hours,
+		         truncate(sum(if(start>qtime, (start-qtime), 0))/3600, 2) as total_waiting_time,
+		         truncate(sum(if(start>qtime, (start-qtime), 0))/3600/count(*), 2) as average_waiting_time
+		  from audit
+		   where done>=#mid# and      done<= #top#
+		   group by user 
+					) DERIVED
+					WHERE
+		   	     ]]>
+		       user IN <iterate property="users" open="(" close=")" conjunction=","> #users[]# </iterate>
+		       group by user
+   </select>   
+
    <select id="getStatisticsForProjectSet" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.UserStatistics">
      <![CDATA[
-       SELECT
-         user AS user,
-         count(*) AS jobs, 
-         sum(cores) AS total_cores, 
-         TRUNCATE(SUM(IF(done>start, cores*(done-start), 0))/3600, 2) AS total_core_hours,
-         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600, 2) AS total_waiting_time,
-         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600/count(*), 2) AS average_waiting_time
-       FROM audit 
-       WHERE done>=#bottom# AND
-             done<#top# AND
+		select user,
+		sum(jobs) as jobs,
+		sum(total_cores) as total_cores,
+		truncate(sum(core_hours),2) as total_core_hours,
+		truncate(sum(waiting_time),2) as total_waiting_time,
+		(sum(waiting_time)/sum(jobs)) as average_waiting_time 
+		from audit_project_prev 
+		where 
+		concat_ws('', year, month) between #bottom# and #top# and
+             
      ]]>
-             account IN <iterate property="projects" open="(" close=")" conjunction=","> #projects[]# </iterate>
+      project IN <iterate property="projects" open="(" close=")" conjunction=","> #projects[]# </iterate>
        GROUP BY user
    </select>
-   
-   <!-- queries to create the bar diagrams -->
-   
-   <!-- statistics for all users for a time interval -->
+
+<select id="getStatisticsForProjectSetLatest" parameterClass="java.util.Map"
+		resultClass="eresearch.audit.pojo.UserStatistics">
+   	<![CDATA[
+		   SELECT 
+		  user ,
+		  SUM(jobs) AS jobs,
+		  SUM(total_cores) AS total_cores,
+		  truncate(SUM(total_core_hours),2) AS total_core_hours,
+		  truncate(SUM(total_waiting_time),2) AS total_waiting_time,
+		  AVG(average_waiting_time) as average_waiting_time
+		FROM
+		(
+
+	select user,
+		project,
+		sum(jobs) as jobs,
+		sum(total_cores) as total_cores,
+		sum(core_hours) as total_core_hours,
+		sum(waiting_time) as total_waiting_time,
+		(sum(waiting_time)/sum(jobs)) as average_waiting_time
+		from audit_project_prev 
+		where 
+		concat_ws('', year, month) between #start# and #end#
+       group by user		
+       
+       union
+		
+		  select user, 
+		  project,
+		   count(*) as jobs,
+		  sum(cores) as total_cores,
+		         truncate(sum(core_hours), 2) as total_core_hours,
+		         truncate(sum(waiting_time), 2) as total_waiting_time,
+		         truncate(avg(waiting_time), 2) as average_waiting_time
+		  from audit_project
+		   where done >= #bottom# and done < #mid# 
+		  group by user
+		  
+		  union
+		   
+		  select user,
+		  account as project,
+		   count(*) as jobs,
+		  sum(cores) as total_cores,
+		  truncate(sum(if(done>start, cores*(done-start), 0))/3600, 2) as total_core_hours,
+		  truncate(sum(if(start>qtime, (start-qtime), 0))/3600, 2) as total_waiting_time,
+		  truncate(sum(if(start>qtime, (start-qtime), 0))/3600/count(*), 2) as average_waiting_time
+		  from audit
+		   where done>=#mid# and      done<= #top#
+		   group by user 
+					) DERIVED
+					WHERE
+		   	     ]]>
+		      project IN
+					<iterate property="projects" open="(" close=")" conjunction=",">
+						#projects[]# </iterate>
+					group by user
+   </select>
+
    <select id="getBarDiagramStatisticsForAllUsersForInterval" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.BarDiagramStatistics">
      <![CDATA[
-       SELECT
-         SUM(IF(jobtype='serial',1,0)) AS serial_jobs,
-         SUM(IF(jobtype='parallel',1,0)) AS parallel_jobs,
-         TRUNCATE(SUM(IF(jobtype='serial' AND done>start, cores*(done-start), 0))/3600,2) AS serial_core_hours,
-         TRUNCATE(SUM(IF(jobtype='parallel' AND done>start, cores*(done-start), 0))/3600,2) AS parallel_core_hours,
-         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600/count(*), 2) as avg_waiting_hours
-       FROM audit 
-       WHERE done>=#bottom# AND
-             done<#top#
+			select 
+			sum(serial_jobs) as serial_jobs,
+			sum(parallel_jobs) as parallel_jobs,
+			sum(serial_core_hours) serial_core_hours,
+			sum(parallel_core_hours) parallel_core_Hours,
+			(sum(waiting_time)/sum(jobs)) as avg_waiting_hours
+			from audit_user_prev 
+			where month=#bottom# and year=#top#
      ]]>
    </select>
 
-   <!-- statistics for all users affiliated with a certain institute, for a time interval -->
    <select id="getBarDiagramStatisticsForUserSetForInterval" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.BarDiagramStatistics">
      <![CDATA[
-       SELECT
-         SUM(IF(jobtype='serial',1,0)) AS serial_jobs,
-         SUM(IF(jobtype='parallel',1,0)) AS parallel_jobs,
-         TRUNCATE(SUM(IF(jobtype='serial' AND done>start, cores*(done-start), 0))/3600,2) AS serial_core_hours,
-         TRUNCATE(SUM(IF(jobtype='parallel' AND done>start, cores*(done-start), 0))/3600,2) AS parallel_core_hours,
-         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600/count(*), 2) as avg_waiting_hours
-       FROM audit 
-       WHERE done>=#bottom# AND
-             done<#top# AND
-     ]]>
+ 			select  
+ 			sum(serial_jobs) as serial_jobs, 
+ 			sum(parallel_jobs) as parallel_jobs, 
+			sum(serial_core_hours) as serial_core_hours,
+ 			sum(parallel_core_hours) as parallel_core_hours,
+ 			(sum(waiting_time)/sum(jobs)) as avg_waiting_hours,
+ 			month, year 
+ 			from audit_user_prev  
+ 			where month=#bottom# and year=#top# AND 
+      ]]> 
              user IN <iterate property="uids" open="(" close=")" conjunction=","> #uids[]# </iterate>
    </select>
-
-   <!-- statistics for a set of projects, for a time interval -->
-   <select id="getBarDiagramStatisticsForProjectSetForInterval" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.BarDiagramStatistics">
+   
+   <select id="getBarDiagramStatisticsForUserSetForIntervalCurr" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.BarDiagramStatistics">
      <![CDATA[
-       SELECT
-         SUM(IF(jobtype='serial',1,0)) AS serial_jobs,
-         SUM(IF(jobtype='parallel',1,0)) AS parallel_jobs,
-         TRUNCATE(SUM(IF(jobtype='serial' AND done>start, cores*(done-start), 0))/3600,2) AS serial_core_hours,
-         TRUNCATE(SUM(IF(jobtype='parallel' AND done>start, cores*(done-start), 0))/3600,2) AS parallel_core_hours,
-         TRUNCATE(SUM(IF(start>qtime, (start-qtime), 0))/3600/count(*), 2) as avg_waiting_hours
-       FROM audit 
-       WHERE done>=#bottom# AND
-             done<#top# AND
+select 
+			sum(serial_jobs) as serial_jobs,
+			sum(parallel_jobs) as parallel_jobs,
+			sum(serial_core_hours) as serial_core_hours,
+			sum(parallel_core_hours) as parallel_core_hours,
+			(sum(tot_waiting_time)/sum(tot_jobs)) as avg_waiting_hours from
+			(			 
+			select  
+          SUM(IF(jobtype='serial',1,0)) AS serial_jobs,  
+          SUM(IF(jobtype='parallel',1,0)) AS parallel_jobs,  
+           TRUNCATE(SUM(IF(jobtype='serial', CORE_HOURS, 0)),2) AS serial_core_hours,  
+          TRUNCATE(SUM(IF(jobtype='parallel', CORE_HOURS, 0)),2) AS parallel_core_hours,  
+		  sum(waiting_time) as tot_waiting_time,
+          count(*) as tot_jobs 
+        FROM audit_user
+			 			where done >= #bottom#  and done < #mid# and
+			 ]]> 
+             user IN <iterate property="uids" open="(" close=")" conjunction=","> #uids[]# </iterate>
+                  <![CDATA[
+				union	
+				SELECT 
+			          SUM(IF(jobtype='serial',1,0)) AS serial_jobs, 
+			          SUM(IF(jobtype='parallel',1,0)) AS parallel_jobs, 
+			          TRUNCATE(SUM(IF(jobtype='serial' AND done>start, cores*(done-start), 0))/3600,2) AS serial_core_hours, 
+			          TRUNCATE(SUM(IF(jobtype='parallel' AND done>start, cores*(done-start), 0))/3600,2) AS parallel_core_hours, 
+			          (sum(if(start>qtime, (start-qtime), 0))/3600) as tot_waiting_time,  
+					  count(*) as tot_jobs
+			        FROM audit  
+					WHERE done>= #mid# AND done<= #top# and
+			 ]]> 
+             user IN <iterate property="uids" open="(" close=")" conjunction=","> #uids[]# </iterate>
+			)	derived
+
+   </select>   
+
+ <select id="getBarDiagramStatisticsForProjectSetForInterval" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.BarDiagramStatistics">
+     <![CDATA[
+     		select
+ 			sum(serial_jobs) as serial_jobs, 
+ 			sum(parallel_jobs) as parallel_jobs, 
+			sum(serial_core_hours) as serial_core_hours,
+ 			sum(parallel_core_hours) as parallel_core_hours,
+ 			(sum(waiting_time)/sum(jobs)) as avg_waiting_hours
+ 			from audit_project_prev  
+ 			where month=#bottom# and year=#top# AND 
+
      ]]>
-             account IN <iterate property="projects" open="(" close=")" conjunction=","> #projects[]# </iterate>
+             project IN <iterate property="projects" open="(" close=")" conjunction=","> #projects[]# </iterate>
    </select>
    
+   <select id="getBarDiagramStatisticsForProjectSetForIntervalCurr" parameterClass="java.util.Map" resultClass="eresearch.audit.pojo.BarDiagramStatistics">
+     <![CDATA[
+select 
+			sum(serial_jobs) as serial_jobs,
+			sum(parallel_jobs) as parallel_jobs,
+			sum(serial_core_hours) as serial_core_hours,
+			sum(parallel_core_hours) as parallel_core_hours,
+			(sum(tot_waiting_time)/sum(tot_jobs)) as avg_waiting_hours from
+			(			 
+			select  
+			project,
+          SUM(IF(jobtype='serial',1,0)) AS serial_jobs,  
+          SUM(IF(jobtype='parallel',1,0)) AS parallel_jobs,  
+           TRUNCATE(SUM(IF(jobtype='serial', CORE_HOURS, 0)),2) AS serial_core_hours,  
+          TRUNCATE(SUM(IF(jobtype='parallel', CORE_HOURS, 0)),2) AS parallel_core_hours,  
+		  sum(waiting_time) as tot_waiting_time,
+          count(*) as tot_jobs 
+        FROM audit_project
+			 			where done >= #bottom#  and done < #mid# and
+			 ]]> 
+             project IN <iterate property="projects" open="(" close=")" conjunction=","> #projects[]#</iterate>
+                  <![CDATA[
+				union	
+				SELECT 
+				account as project,
+			          SUM(IF(jobtype='serial',1,0)) AS serial_jobs, 
+			          SUM(IF(jobtype='parallel',1,0)) AS parallel_jobs, 
+			          TRUNCATE(SUM(IF(jobtype='serial' AND done>start, cores*(done-start), 0))/3600,2) AS serial_core_hours, 
+			          TRUNCATE(SUM(IF(jobtype='parallel' AND done>start, cores*(done-start), 0))/3600,2) AS parallel_core_hours, 
+			          (sum(if(start>qtime, (start-qtime), 0))/3600) as tot_waiting_time,  
+					  count(*) as tot_jobs
+			        FROM audit  
+					WHERE done>= #mid# AND done<= #top# and
+			 ]]> 
+             account IN <iterate property="projects" open="(" close=")" conjunction=","> #projects[]#</iterate>
+			)	derived
+   </select>   
+   
+   
+   
+	<!--fetch a list of all the distinct 'year' values in the audit table (except 1970) -->
    <select id="getAuditYears" resultClass="java.lang.String">
    	<![CDATA[
    		SELECT DISTINCT FROM_UNIXTIME(DONE,'%Y') AS YEARS FROM audit WHERE FROM_UNIXTIME(DONE,'%Y')>1970; 
