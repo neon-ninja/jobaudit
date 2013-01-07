@@ -1,5 +1,6 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="f" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
 <html>
 <head>
@@ -125,7 +126,7 @@
 			selected_id=qs_user;			
 		} 
 		else if (qs_project != "") {
-			for(var i=0;i<projects[i].length;i++)
+			for(var i=0;i<projects.length;i++)
 			{
 				options += "<option id=\"" + projects[i] + "\" value='" + projects[i] + "'>" + projects[i] + "</option>";
 			}
@@ -169,6 +170,7 @@
 		}
 		$("#select2").html(options);
 	}
+	
 
     $(document).ready(function() {
     	build_initial_selects();
@@ -356,7 +358,7 @@
       <th>Jobs</th>
       <th>Jobs (Grid)</th>
       <th>Total Cores</th>
-      <th>Total Core Hours</th>
+      <th class="{sorter: 'digit'}">Total Core Hours</th>
       <th>Total Core Hours (Grid)</th>
       <th>Total Waiting Time</th>
       <th>Average Waiting Time</th>
@@ -364,17 +366,18 @@
     </thead><tbody>
   
   <c:forEach items="${user_statistics}" var="statistics">
+  	 <c:set var="avgWaitingTime" value="${statistics.total_waiting_time/statistics.jobs}" />
     <tr>
       <td><a href="<%=request.getContextPath()%>/html/userrecords?upi=${statistics.user}">
             <script type="text/javascript">document.write(usermap["${statistics.user}"]);</script></a></td> 
       <td><a href="<%=request.getContextPath()%>/html/userrecords?upi=${statistics.user}">${statistics.user}</a></td> 
-      <td>${statistics.jobs}</td> 
-      <td>${statistics.grid_jobs}</td> 
-      <td>${statistics.total_cores}</td> 
-      <td>${statistics.total_core_hours}</td> 
-      <td>${statistics.total_grid_core_hours}</td> 
-      <td>${statistics.total_waiting_time}</td> 
-      <td>${statistics.average_waiting_time}</td>
+      <td align="right">${statistics.jobs}</td> 
+      <td align="right">${statistics.grid_jobs}</td> 
+      <td align="right">${statistics.total_cores}</td> 
+      <td align="right">${statistics.total_core_hours}</td>
+      <td align="right">${statistics.total_grid_core_hours}</td> 
+	  <td align="right">${statistics.total_waiting_time}</td>
+      <td align="right"><fmt:formatNumber value="${avgWaitingTime}" type="Number" maxFractionDigits="2"/></td>
     </tr>
   </c:forEach>
   </tbody>
