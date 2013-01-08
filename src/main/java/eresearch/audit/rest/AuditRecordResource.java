@@ -1,5 +1,6 @@
 package eresearch.audit.rest;
 
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import javax.ws.rs.GET;
@@ -34,7 +35,13 @@ public class AuditRecordResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public UserStatistics getStatisticsForIndividualUser(@PathParam("uid") String uid, @PathParam("bottom") String bottom, 
 	    @PathParam("top") String top) throws Exception {
-		return (UserStatistics) this.auditRecordDao.getStatisticsForUser(uid, bottom, top).get();
+		Calendar from = Calendar.getInstance();
+		Calendar to = Calendar.getInstance();
+		List<String> l = new LinkedList<String>();
+		l.add(uid);
+		from.setTimeInMillis(Long.valueOf(bottom) * 1000);
+		to.setTimeInMillis(Long.valueOf(top) * 1000);
+		return (UserStatistics) this.auditRecordDao.getStatisticsForUser(l, from, to).get();
 	}
 
 	public void setAuditRecordDao(AuditRecordDao auditRecordDao) {
