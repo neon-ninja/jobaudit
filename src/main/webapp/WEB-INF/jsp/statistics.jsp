@@ -249,92 +249,93 @@
   
   <button type="button" onClick="get_data()">Go!</button> 
    
-  <c:if test="${not empty user_statistics}">
-  <br>  
-  <c:set var="totalNumberJobs" value="0" />
-  <c:set var="totalCoreHours" value="0" />
-  <c:set var="totalNumberGridJobs" value="0" />
-  <c:set var="totalGridCoreHours" value="0" />
-  <c:forEach items="${user_statistics}" var="statistics">
-    <c:set var="totalNumberJobs" value="${totalNumberJobs + statistics.jobs}" />
-    <c:set var="totalCoreHours" value="${totalCoreHours + statistics.total_core_hours}" />
-    <c:set var="totalNumberGridJobs" value="${totalNumberGridJobs + statistics.grid_jobs}" />
-    <c:set var="totalGridCoreHours" value="${totalGridCoreHours + statistics.total_grid_core_hours}" />
-  </c:forEach>
+  <c:choose>
+    <c:when test="${not empty user_statistics}">
+      <br>  
+      <c:set var="totalNumberJobs" value="0" />
+      <c:set var="totalCoreHours" value="0" />
+      <c:set var="totalNumberGridJobs" value="0" />
+      <c:set var="totalGridCoreHours" value="0" />
+      <c:forEach items="${user_statistics}" var="statistics">
+        <c:set var="totalNumberJobs" value="${totalNumberJobs + statistics.jobs}" />
+        <c:set var="totalCoreHours" value="${totalCoreHours + statistics.total_core_hours}" />
+        <c:set var="totalNumberGridJobs" value="${totalNumberGridJobs + statistics.grid_jobs}" />
+        <c:set var="totalGridCoreHours" value="${totalGridCoreHours + statistics.total_grid_core_hours}" />
+      </c:forEach>
   
-  <c:set var="gridJobsPercentage" value="${(100*totalNumberGridJobs)/totalNumberJobs}" />
-  <c:set var="gridTotalHoursPercentage" value="${(100*totalGridCoreHours)/totalCoreHours}" />
+    <c:set var="gridJobsPercentage" value="${(100*totalNumberGridJobs)/totalNumberJobs}" />
+    <c:set var="gridTotalHoursPercentage" value="${(100*totalGridCoreHours)/totalCoreHours}" />
 
-  <h4>Total number of jobs</h4>
-  <table id="bordered">
-  	<tr>
-  	  <td>&nbsp;</td>
-  	  <td align="right">Total</td>
-  	  <td align="right">Via Grid</td>
-  	</tr>
-    <tr>
-      <td>Number of jobs</td>
-      <td align="right"><b>${totalNumberJobs}</b></td>
-      <td align="right"><b>${totalNumberGridJobs}</b> (<script type="text/javascript">document.write(${gridJobsPercentage}.toFixed(2))</script> %)</td>
-    </tr>
-    <tr>
-      <td>Core hours</td>
-      <td align="right"><b><script type="text/javascript">document.write(${totalCoreHours}.toFixed(2))</script></b></td>
-      <td align="right"><b><script type="text/javascript">document.write(${totalGridCoreHours}.toFixed(2))</script></b> (<script type="text/javascript">document.write(${gridTotalHoursPercentage}.toFixed(2))</script> %)</td>
-    </tr>
-  </table>
+    <h4>Total number of jobs</h4>
+    <table id="bordered">
+      <tr>
+  	    <td>&nbsp;</td>
+  	    <td align="right">Total</td>
+  	    <td align="right">Via Grid</td>
+  	  </tr>
+      <tr>
+        <td>Number of jobs</td>
+        <td align="right"><b>${totalNumberJobs}</b></td>
+        <td align="right"><b>${totalNumberGridJobs}</b> (<script type="text/javascript">document.write(${gridJobsPercentage}.toFixed(2))</script> %)</td>
+      </tr>
+      <tr>
+        <td>Core hours</td>
+        <td align="right"><b><script type="text/javascript">document.write(${totalCoreHours}.toFixed(2))</script></b></td>
+        <td align="right"><b><script type="text/javascript">document.write(${totalGridCoreHours}.toFixed(2))</script></b> (<script type="text/javascript">document.write(${gridTotalHoursPercentage}.toFixed(2))</script> %)</td>
+      </tr>
+    </table>
 
-  <!-- Areas where the diagrams are plotted -->
-  <table border="0" cellpadding="10">
-    <tr>
-      <th>Number Jobs (that actually started)</th>
-      <th>Core Hours</th>
-      <th>Average Waiting Hours</th>
-    </tr>
-    <tr>
-      <td><div id="monthly_jobs_plot" style="width:380px;height:200px;"></div></td>
-      <td><div id="monthly_core_hours_plot" style="width:380px;height:200px;"></div></p></td>
-      <td><div id="monthly_avg_waiting_hours_plot" style="width:380px;height:200px;"></div></td>
-    </tr>
-  </table>
-  <br>
+    <!-- Areas where the diagrams are plotted -->
+    <table border="0" cellpadding="10">
+      <tr>
+        <th>Number Jobs (that actually started)</th>
+        <th>Core Hours</th>
+        <th>Average Waiting Hours</th>
+      </tr>
+      <tr>
+        <td><div id="monthly_jobs_plot" style="width:380px;height:200px;"></div></td>
+        <td><div id="monthly_core_hours_plot" style="width:380px;height:200px;"></div></p></td>
+        <td><div id="monthly_avg_waiting_hours_plot" style="width:380px;height:200px;"></div></td>
+      </tr>
+    </table>
+    <br>
   
-  <!-- Prepare the data to be plotted -->
-  <c:forEach items="${job_statistics}" var="statistics">
-    <c:if test="${not empty statistics.serial_jobs}">
-      <script type="text/javascript">
-        var arr = new Array(${statistics.serial_jobs}, ${statistics.bottom}*1000);
-        monthly_serial_jobs_data.push(arr);
-      </script>      
-    </c:if>
-    <c:if test="${not empty statistics.parallel_jobs}">
-      <script type="text/javascript">
-        var arr = new Array(${statistics.parallel_jobs}, ${statistics.bottom}*1000);
-        monthly_parallel_jobs_data.push(arr);
-      </script>      
-    </c:if>
-    <c:if test="${not empty statistics.serial_core_hours}">
-      <script type="text/javascript">
-        var arr = new Array(${statistics.serial_core_hours}, ${statistics.bottom}*1000);
-        monthly_serial_core_hours_data.push(arr);
-      </script>
-    </c:if>
-    <c:if test="${not empty statistics.parallel_core_hours}">
-      <script type="text/javascript">
-        var arr = new Array(${statistics.parallel_core_hours}, ${statistics.bottom}*1000);
-        monthly_parallel_core_hours_data.push(arr);
-      </script>
-    </c:if>
-    <c:if test="${not empty statistics.avg_waiting_hours}">
-      <script type="text/javascript">
-        var arr = new Array(${statistics.avg_waiting_hours}, ${statistics.bottom}*1000);
-        monthly_avg_waiting_hours_data.push(arr);
-      </script>
-    </c:if>
-  </c:forEach>
+    <!-- Prepare the data to be plotted -->
+    <c:forEach items="${job_statistics}" var="statistics">
+      <c:if test="${not empty statistics.serial_jobs}">
+        <script type="text/javascript">
+          var arr = new Array(${statistics.serial_jobs}, ${statistics.bottom}*1000);
+          monthly_serial_jobs_data.push(arr);
+        </script>      
+      </c:if>
+      <c:if test="${not empty statistics.parallel_jobs}">
+        <script type="text/javascript">
+          var arr = new Array(${statistics.parallel_jobs}, ${statistics.bottom}*1000);
+          monthly_parallel_jobs_data.push(arr);
+        </script>      
+      </c:if>
+      <c:if test="${not empty statistics.serial_core_hours}">
+        <script type="text/javascript">
+          var arr = new Array(${statistics.serial_core_hours}, ${statistics.bottom}*1000);
+          monthly_serial_core_hours_data.push(arr);
+        </script>
+      </c:if>
+      <c:if test="${not empty statistics.parallel_core_hours}">
+        <script type="text/javascript">
+          var arr = new Array(${statistics.parallel_core_hours}, ${statistics.bottom}*1000);
+          monthly_parallel_core_hours_data.push(arr);
+        </script>
+      </c:if>
+      <c:if test="${not empty statistics.avg_waiting_hours}">
+        <script type="text/javascript">
+          var arr = new Array(${statistics.avg_waiting_hours}, ${statistics.bottom}*1000);
+          monthly_avg_waiting_hours_data.push(arr);
+        </script>
+      </c:if>
+    </c:forEach>
 
-  <!-- Plot the bar diagrams -->
-  <script type="text/javascript">
+    <!-- Plot the bar diagrams -->
+    <script type="text/javascript">
       draw_stacked_bar_diagram(monthly_jobs_plot, [ 
           { "label": "Serial Jobs", "data": monthly_serial_jobs_data, "color": "#06c" },
           { "label": "Parallel Jobs", "data": monthly_parallel_jobs_data, "color": "#d70" }
@@ -346,44 +347,48 @@
       draw_stacked_bar_diagram(monthly_avg_waiting_hours_plot, [
           { "label": "Avg. Waiting Hours", "data": monthly_avg_waiting_hours_data, "color": "#b00" }
       ]);
-  </script>
-  <br>
+    </script>
+    <br>
   
-  <!-- User overview -->
-  <b>Per user:</b>
-  <table id="statistics" class="tablesorter"><thead>
-    <tr>
-      <th>User Name</th>
-      <th>User ID</th>
-      <th>Jobs</th>
-      <th>Jobs (Grid)</th>
-      <th>Total Cores</th>
-      <th class="{sorter: 'digit'}">Total Core Hours</th>
-      <th>Total Core Hours (Grid)</th>
-      <th>Total Waiting Time</th>
-      <th>Average Waiting Time</th>
-    </tr>
-    </thead><tbody>
+    <!-- User overview -->
+    <b>Per user:</b>
+    <table id="statistics" class="tablesorter"><thead>
+      <tr>
+        <th>User Name</th>
+        <th>User ID</th>
+        <th>Jobs</th>
+        <th>Jobs (Grid)</th>
+        <th>Total Cores</th>
+        <th class="{sorter: 'digit'}">Total Core Hours</th>
+        <th>Total Core Hours (Grid)</th>
+        <th>Total Waiting Time</th>
+        <th>Average Waiting Time</th>
+      </tr>
+      </thead><tbody>
   
-  <c:forEach items="${user_statistics}" var="statistics">
-  	 <c:set var="avgWaitingTime" value="${statistics.total_waiting_time/statistics.jobs}" />
-    <tr>
-      <td><a href="<%=request.getContextPath()%>/html/userrecords?upi=${statistics.user}">
+    <c:forEach items="${user_statistics}" var="statistics">
+  	  <c:set var="avgWaitingTime" value="${statistics.total_waiting_time/statistics.jobs}" />
+      <tr>
+        <td><a href="<%=request.getContextPath()%>/html/userrecords?upi=${statistics.user}">
             <script type="text/javascript">document.write(usermap["${statistics.user}"]);</script></a></td> 
-      <td><a href="<%=request.getContextPath()%>/html/userrecords?upi=${statistics.user}">${statistics.user}</a></td> 
-      <td align="right">${statistics.jobs}</td> 
-      <td align="right">${statistics.grid_jobs}</td> 
-      <td align="right">${statistics.total_cores}</td> 
-      <td align="right">${statistics.total_core_hours}</td>
-      <td align="right">${statistics.total_grid_core_hours}</td> 
-	  <td align="right">${statistics.total_waiting_time}</td>
-      <td align="right"><fmt:formatNumber value="${avgWaitingTime}" type="Number" maxFractionDigits="2"/></td>
-    </tr>
-  </c:forEach>
-  </tbody>
-  </table>
-  
-  </c:if>
+        <td><a href="<%=request.getContextPath()%>/html/userrecords?upi=${statistics.user}">${statistics.user}</a></td> 
+        <td align="right">${statistics.jobs}</td> 
+        <td align="right">${statistics.grid_jobs}</td> 
+        <td align="right">${statistics.total_cores}</td> 
+        <td align="right">${statistics.total_core_hours}</td>
+        <td align="right">${statistics.total_grid_core_hours}</td> 
+	    <td align="right">${statistics.total_waiting_time}</td>
+        <td align="right"><fmt:formatNumber value="${avgWaitingTime}" type="Number" maxFractionDigits="2"/></td>
+      </tr>
+    </c:forEach>
+    </tbody>
+    </table>
+  </c:when>
+  <c:otherwise>
+    <br><br>
+    <b>No audit data available for current selection</b>
+  </c:otherwise>
+  </c:choose>
   </div>
 </body>
 
