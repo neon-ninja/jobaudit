@@ -114,7 +114,6 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 				    	params.put("users", users);
 			    		params.put("start", start);
 			    		params.put("end", end);
-				    	log.error(users.size());
 				    	list = (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForUserLatest", params);
 					}
 					return list;
