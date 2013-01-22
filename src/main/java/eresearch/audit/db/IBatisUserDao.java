@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+
+import org.apache.log4j.Logger;
 import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
 import eresearch.audit.pojo.Affiliation;
 import eresearch.audit.pojo.User;
@@ -19,7 +21,8 @@ import eresearch.audit.util.UserComparator;
 public class IBatisUserDao extends SqlMapClientDaoSupport implements UserDao {
 
 	private ExecutorService executorService;
-	
+	Logger log = Logger.getLogger(Thread.currentThread().getClass());
+
 	public Future<User> getUser(final String upi) throws Exception {
 		return this.executorService.submit(
 			new Callable<User>() {
