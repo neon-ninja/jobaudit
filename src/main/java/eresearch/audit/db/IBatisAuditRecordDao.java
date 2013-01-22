@@ -219,12 +219,17 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		return this.executorService.submit(
 			new Callable<BarDiagramStatistics>() {
 				public BarDiagramStatistics call() throws Exception {
-					Map<String,Object> params = new HashMap<String,Object>();
-					params.put("bottom", bottom);
-					params.put("top", top);
-					params.put("mid", mid);
-					params.put("uids", uids);
-					BarDiagramStatistics bds = (BarDiagramStatistics) getSqlMapClientTemplate().queryForObject("getBarDiagramStatisticsForUserSetForIntervalCurr", params);
+					BarDiagramStatistics bds = null;
+					if (uids == null || uids.size() == 0) {
+						bds = new BarDiagramStatistics();
+					} else {
+						Map<String,Object> params = new HashMap<String,Object>();
+						params.put("bottom", bottom);
+						params.put("top", top);
+						params.put("mid", mid);
+						params.put("uids", uids);
+						bds = (BarDiagramStatistics) getSqlMapClientTemplate().queryForObject("getBarDiagramStatisticsForUserSetForIntervalCurr", params);
+					}
 					bds.setBottom(Integer.parseInt(bottom));
 					bds.setTop(Integer.parseInt(top));
 					return bds;
@@ -237,11 +242,16 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		return this.executorService.submit(
 			new Callable<BarDiagramStatistics>() {
 				public BarDiagramStatistics call() throws Exception {
-					Map<String,Object> params = new HashMap<String,Object>();
-					params.put("bottom", (bottom.length()==1?"0"+bottom:bottom));
-					params.put("top", (top.length()==1?"0"+top:top));
-					params.put("uids", uids);
-					BarDiagramStatistics bds = (BarDiagramStatistics) getSqlMapClientTemplate().queryForObject("getBarDiagramStatisticsForUserSetForInterval", params);
+					BarDiagramStatistics bds = null;
+					if (uids == null || uids.size() == 0) {
+						bds = new BarDiagramStatistics();
+					} else {
+						Map<String,Object> params = new HashMap<String,Object>();
+						params.put("bottom", (bottom.length()==1?"0"+bottom:bottom));
+						params.put("top", (top.length()==1?"0"+top:top));
+						params.put("uids", uids);
+						bds = (BarDiagramStatistics) getSqlMapClientTemplate().queryForObject("getBarDiagramStatisticsForUserSetForInterval", params);
+					}
 					int month = Integer.parseInt(bottom);
 					int year = Integer.parseInt(top);
 					Calendar cal= Calendar.getInstance();
@@ -259,11 +269,16 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		return this.executorService.submit(
 			new Callable<BarDiagramStatistics>() {
 				public BarDiagramStatistics call() throws Exception {
-					Map<String,Object> params = new HashMap<String,Object>();
-					params.put("bottom", (bottom.length()==1?"0"+bottom:bottom));
-					params.put("top", (top.length()==1?"0"+top:top));
-					params.put("projects", projects);
-					BarDiagramStatistics bds = (BarDiagramStatistics) getSqlMapClientTemplate().queryForObject("getBarDiagramStatisticsForProjectSetForInterval", params);
+					BarDiagramStatistics bds = null;
+					if (projects == null || projects.size() == 0) {
+						bds = new BarDiagramStatistics();
+					} else {
+						Map<String,Object> params = new HashMap<String,Object>();
+						params.put("bottom", (bottom.length()==1?"0"+bottom:bottom));
+						params.put("top", (top.length()==1?"0"+top:top));
+						params.put("projects", projects);
+						bds = (BarDiagramStatistics) getSqlMapClientTemplate().queryForObject("getBarDiagramStatisticsForProjectSetForInterval", params);
+					}
 					int month = Integer.parseInt(bottom);
 					int year = Integer.parseInt(top);
 					Calendar cal= Calendar.getInstance();
@@ -280,14 +295,19 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 	//get bar diagram statistics for current month's data
 	public Future<BarDiagramStatistics> getBarDiagramStatisticsForProjectSetCurr(final List<String> projects, final String bottom, final String mid, final String top) throws Exception {
 		return this.executorService.submit(
-				new Callable<BarDiagramStatistics>() {
-					public BarDiagramStatistics call() throws Exception {
+			new Callable<BarDiagramStatistics>() {
+				public BarDiagramStatistics call() throws Exception {
+					BarDiagramStatistics bds = null;
+					if (projects == null || projects.size() == 0) {
+						bds = new BarDiagramStatistics();
+					} else {
 						Map<String,Object> params = new HashMap<String,Object>();
 						params.put("bottom", bottom);
 						params.put("top", top);
-					params.put("mid", mid);
-					params.put("projects", projects);
-					BarDiagramStatistics bds = (BarDiagramStatistics) getSqlMapClientTemplate().queryForObject("getBarDiagramStatisticsForProjectSetForIntervalCurr", params);
+						params.put("mid", mid);
+						params.put("projects", projects);
+						bds = (BarDiagramStatistics) getSqlMapClientTemplate().queryForObject("getBarDiagramStatisticsForProjectSetForIntervalCurr", params);
+					}
 					bds.setBottom(Integer.parseInt(bottom));
 					bds.setTop(Integer.parseInt(top));
 					return bds;
