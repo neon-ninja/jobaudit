@@ -12,9 +12,9 @@ import org.apache.log4j.Logger;
 
 public class StatisticsAffiliationController extends StatisticsUserController {
 
-	static Logger log = Logger.getLogger("StatisticsAffiliationController.class");
+	static Logger log = Logger.getLogger(Thread.currentThread().getClass());
+	
 	protected List<String> createUserList(HttpServletRequest req) throws Exception {
-		log.info("Inside createUserList");
 		Map params = req.getParameterMap();
 		List<String> users = new LinkedList<String>();
 		Future<List<String>> fuserlist = null;
