@@ -3,6 +3,7 @@ package eresearch.audit.db;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -11,12 +12,15 @@ import java.util.concurrent.Future;
 import eresearch.audit.pojo.AuditRecord;
 import eresearch.audit.pojo.BarDiagramStatistics;
 import eresearch.audit.pojo.UserStatistics;
+
+import org.apache.log4j.Logger;
 import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
 
 public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements AuditRecordDao {
 
 	private ExecutorService executorService;
-	
+	Logger log = Logger.getLogger(Thread.currentThread().getClass());
+ 	
 	public Future<Integer> getNumberRecords(final String user) throws Exception {
 		return this.executorService.submit(
 			new Callable<Integer>() {
@@ -43,7 +47,7 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		);
 	}
 	
-	public Future<List<UserStatistics>> getStatisticsForUser(final List<String> userlist, final Calendar from, final Calendar to) throws Exception {
+	public Future<List<UserStatistics>> getStatisticsForUser(final List<String> userlist, final Calendar from, final Calendar to) throws Exception {		
 		String high = ""+(to.getTimeInMillis()/1000);
 		String mid = null;
 		
@@ -78,11 +82,17 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		return this.executorService.submit(
 			new Callable<List<UserStatistics>>() {
 				public List<UserStatistics> call() throws Exception {
-					Map<String,Object> params = new HashMap<String,Object>();
-					params.put("bottom", bottom);
-					params.put("top", top);
-					params.put("users", users);
-					return (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForUser", params);
+					List<UserStatistics> list = null;
+					if (users == null || users.size() == 0) {
+						list = new LinkedList<UserStatistics>();
+					} else {
+						Map<String,Object> params = new HashMap<String,Object>();
+						params.put("bottom", bottom);
+						params.put("top", top);
+						params.put("users", users);
+						list = (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForUser", params);
+					}
+					return list;
 				}
 			}
 		);
@@ -93,14 +103,21 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		return this.executorService.submit(
 			new Callable<List<UserStatistics>>() {
 				public List<UserStatistics> call() throws Exception {
-					Map<String,Object> params = new HashMap<String,Object>();
-					params.put("bottom", bottom);
-					params.put("mid", mid);
-					params.put("top", top);
-					params.put("users", users);
-					params.put("start", start);
-					params.put("end", end);
-					return (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForUserLatest", params);
+					List<UserStatistics> list = null;
+					if (users == null || users.size() == 0) {
+						list = new LinkedList<UserStatistics>();
+					} else {
+						Map<String,Object> params = new HashMap<String,Object>();
+					    params.put("bottom", bottom);
+				    	params.put("mid", mid);
+					    params.put("top", top);
+				    	params.put("users", users);
+			    		params.put("start", start);
+			    		params.put("end", end);
+				    	log.error(users.size());
+				    	list = (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForUserLatest", params);
+					}
+					return list;
 				}
 			}
 		);
@@ -141,11 +158,17 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		return this.executorService.submit(
 			new Callable<List<UserStatistics>>() {
 				public List<UserStatistics> call() throws Exception {
-					Map<String,Object> params = new HashMap<String,Object>();
-					params.put("bottom", bottom);
-					params.put("top", top);
-					params.put("projects", projects);
-					return (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForProjectSet", params);
+					List<UserStatistics> list = null;
+					if (projects == null || projects.size() == 0) {
+						list = new LinkedList<UserStatistics>();
+					} else {
+						Map<String,Object> params = new HashMap<String,Object>();
+						params.put("bottom", bottom);
+						params.put("top", top);
+						params.put("projects", projects);
+						list = (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForProjectSet", params);
+					}
+					return list;
 				}
 			}
 		);
@@ -156,14 +179,20 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		return this.executorService.submit(
 			new Callable<List<UserStatistics>>() {
 				public List<UserStatistics> call() throws Exception {
-					Map<String,Object> params = new HashMap<String,Object>();
-					params.put("bottom", bottom);
-					params.put("mid", mid);
-					params.put("top", top);
-					params.put("projects", projects);
-					params.put("start", start);
-					params.put("end", end);
-					return (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForProjectSetLatest", params);
+					List<UserStatistics> list = null;
+					if (projects == null || projects.size() == 0) {
+						list = new LinkedList<UserStatistics>();
+					} else {
+						Map<String,Object> params = new HashMap<String,Object>();
+						params.put("bottom", bottom);
+						params.put("mid", mid);
+						params.put("top", top);
+						params.put("projects", projects);
+						params.put("start", start);
+						params.put("end", end);
+						list = (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForProjectSetLatest", params);
+					}
+					return list;
 				}
 			}
 		);
