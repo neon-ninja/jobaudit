@@ -1,0 +1,5 @@
+Bugs: 
+* On statistics view for projects: fix grid usage (currently always shows 0%)
+* For project nesi00039: not all users show up on project statistics view. 
+  e.g. markus binsteiner doesn't show up
+  Maybe this is a caching issue
