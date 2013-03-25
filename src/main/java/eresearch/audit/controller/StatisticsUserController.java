@@ -31,7 +31,8 @@ public class StatisticsUserController extends StatisticsController {
 		
 		Calendar from = Calendar.getInstance();
 		Calendar to= Calendar.getInstance();
-		// get statistics for each user
+		
+		// get list of users based on the values in user dropdown
 		List<String> userlist = this.createUserList(request);
 
 		//time period related changes
@@ -39,10 +40,8 @@ public class StatisticsUserController extends StatisticsController {
 		
 		from.set(super.historyStartYear, super.historyStartMonth, 1,0,0,0);
 		to.set(super.historyEndYear, super.historyEndMonth+1, 1,0,0,0);
-
-		int currMonth = new GregorianCalendar().get(Calendar.MONTH);
-		int currYear = new GregorianCalendar().get(Calendar.YEAR);
 		
+		//get statistics
 		uslist=this.auditRecordDao.getStatisticsForUser(userlist, from, to);
 		// collect information from futures
 		userstatslist=uslist.get();
@@ -52,39 +51,11 @@ public class StatisticsUserController extends StatisticsController {
 			userlist.add(stats.getUser());
 		}
 		
-		//get the bar diagram statistics
-		to.set(super.historyEndYear, super.historyEndMonth, 1,0,0,0);
-		int month = super.historyStartMonth;
+		//get bar diagram statistics
+		fbdslist = auditRecordDao.getBarDiagramUserStatistics(userlist,
+				super.historyStartYear, super.historyStartMonth, 
+				super.historyEndYear, super.historyEndMonth);
 		
-		boolean currMonthInRange=false; 
-		//if current month lies in the range of the selected time period
-		if((to.get(Calendar.YEAR)>currYear) || (to.get(Calendar.MONTH) >= currMonth) && (to.get(Calendar.YEAR) ==currYear))	{
-			currMonthInRange=true;
-			to.set(currYear, currMonth-1,1,0,0,0);
-		}
-		
-		from.set(this.historyStartYear, month, 1, 0, 0, 0);
-		while ((from.get(Calendar.YEAR) <= to.get(Calendar.YEAR) && 
-			!(from.get(Calendar.YEAR) == to.get(Calendar.YEAR) && from.get(Calendar.MONTH) > to.get(Calendar.MONTH))))		
-		{
-			if (userlist.size() < 1) {
-				fbdslist.add(auditRecordDao.getBarDiagramStatisticsForAllUsers(
-						"" + (from.get(Calendar.MONTH) + 1),"" + from.get(Calendar.YEAR)));
-			} else {
-				fbdslist.add(auditRecordDao.getBarDiagramStatisticsForUserSet(
-						userlist, "" + (from.get(Calendar.MONTH) + 1), ""+ from.get(Calendar.YEAR)));
-			}
-		    month += 1;
-		    from.set(this.historyStartYear, month, 1, 0, 0, 0);
-		}
-		if(currMonthInRange) //get the data for the current month
-		{
-			from.set(currYear, currMonth, 1, 0, 0, 0);
-			long bottom = from.getTimeInMillis()/1000;
-            from.set(currYear, currMonth+1, 1, 0, 0, 0);
-		    long top = from.getTimeInMillis()/1000;
-		    fbdslist.add(auditRecordDao.getBarDiagramStatisticsForUserSetCurr(userlist,""+bottom ,""+((System.currentTimeMillis()-86400000)/1000), ""+top));
-		}
         for (Future<BarDiagramStatistics> fbds : fbdslist) {
         	bdslist.add(fbds.get());
         }
@@ -104,24 +75,13 @@ public class StatisticsUserController extends StatisticsController {
 
 	protected List<String> createUserList(HttpServletRequest req) throws Exception {
 		log.info("Inside createUserList");
-		
 		Map params = req.getParameterMap();
 		List<String> users = new LinkedList<String>();
 		String user=((String[]) params.get("user"))[0];
 		
-		if (params.containsKey("user")) 
+		if (params.containsKey("user") && !(user.equalsIgnoreCase("all"))) 
 		{
-			if (user.equalsIgnoreCase("all")) {
-				Calendar from = Calendar.getInstance();
-				Calendar to= Calendar.getInstance();
-
-				from.set(super.historyStartYear, super.historyStartMonth, 1,0,0,0);
-				to.set(super.historyEndYear, super.historyEndMonth+1, 1,0,0,0);
-			
-				users.addAll(super.userDao.getUserNames(""+(from.getTimeInMillis()/1000),""+(to.getTimeInMillis()/1000)).get());
-			} else {
-				users.add(user);
-			}
+			users.add(user);
 			setSelectedUser(user);
 		} 
 		else 
@@ -133,6 +93,10 @@ public class StatisticsUserController extends StatisticsController {
 			to.set(super.historyEndYear, super.historyEndMonth+1, 1,0,0,0);
 			// list of all user names
 			users.addAll(super.userDao.getUserNames(""+(from.getTimeInMillis()/1000),""+(to.getTimeInMillis()/1000)).get());
+			if(user.equalsIgnoreCase("all"))
+			{
+				setSelectedUser(user);
+			}
 		}
 		log.info("Returning from createUserList. list size="+users.size());
 		return users;
