@@ -29,6 +29,8 @@ AS
   SELECT
     user AS user,
     cores AS cores,
+    SUM(IF(executable LIKE '%.globus%', 1, 0)) AS grid_jobs,
+    TRUNCATE(SUM(IF(executable LIKE '%.globus%', IF(done>start, cores*(done-start)/3600,0), 0)), 2) AS total_grid_core_hours,
     account AS project,
     jobtype AS jobtype,
     done AS done,
