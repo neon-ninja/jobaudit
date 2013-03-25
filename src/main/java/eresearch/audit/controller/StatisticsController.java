@@ -47,8 +47,11 @@ public class StatisticsController extends AbstractController {
 		Future<List<String>> fproys = this.auditRecordDao.getProjectNames();
 		//Future<List<String>> fyears = this.auditRecordDao.getAuditYears();
 		
-		endYear= new GregorianCalendar().get(Calendar.YEAR);
-		historyEndMonth = new GregorianCalendar().get(Calendar.MONTH);
+		Calendar now = Calendar.getInstance();
+		
+		endYear= now.get(Calendar.YEAR);
+		historyEndMonth = now.get(Calendar.MONTH);
+		
 		historyEndYear = endYear;
 		
 		List<String> fyears = new ArrayList<String>();
