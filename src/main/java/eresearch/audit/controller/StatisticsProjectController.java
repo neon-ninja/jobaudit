@@ -30,6 +30,7 @@ public class StatisticsProjectController extends StatisticsController {
 		setHistoryEndYear(Integer.parseInt(((String[]) params.get("to_y"))[0]));
 		setHistoryEndMonth(Integer.parseInt(((String[]) params.get("to_m"))[0]));
 		
+		//get the list of projects, depending on the value selected in project dropdown
 		List<String> projects = this.createProjectList(request, mav);
 		Future<List<UserStatistics>> fprojectstats;
 
@@ -38,46 +39,19 @@ public class StatisticsProjectController extends StatisticsController {
 	
 		from.set(super.historyStartYear, super.historyStartMonth, 1,0,0,0);
 		to.set(super.historyEndYear, super.historyEndMonth+1, 1,0,0,0);		
-		
-		int currMonth = new GregorianCalendar().get(Calendar.MONTH);
-		int currYear = new GregorianCalendar().get(Calendar.YEAR);		
 
+		//get statistics
 		fprojectstats = this.auditRecordDao.getStatisticsForProjectSet(projects, from, to);
 		
 		List<Future<BarDiagramStatistics>> fbdslist = new LinkedList<Future<BarDiagramStatistics>>();
 		List<BarDiagramStatistics> bdslist = new LinkedList<BarDiagramStatistics>();
+		
+		//get bar diagram statistics
+		fbdslist= auditRecordDao.getProjectStats( projects,
+				super.historyStartYear, super.historyStartMonth, 
+				super.historyEndYear, super.historyEndMonth);
 
-		//get the bar diagram statistics
-		to.set(super.historyEndYear, super.historyEndMonth, 1,0,0,0);
-		int month = super.historyStartMonth;
 		
-		boolean currMonthInRange=false; 
-		//if current month lies in the range of the selected time period
-		if((to.get(Calendar.YEAR)>currYear) || (to.get(Calendar.MONTH) >= currMonth) && (to.get(Calendar.YEAR) ==currYear))	{
-			currMonthInRange=true;
-			to.set(currYear, currMonth-1,1,0,0,0);
-		}
-		
-		//while ((from.get(Calendar.YEAR) <= to.get(Calendar.YEAR) && !(from.get(Calendar.YEAR) == to.get(Calendar.YEAR) && from.get(Calendar.MONTH) > to.get(Calendar.MONTH)))) {
-		from.set(this.historyStartYear, month, 1, 0, 0, 0);
-		while ((from.get(Calendar.YEAR) <= to.get(Calendar.YEAR) && 
-			!(from.get(Calendar.YEAR) == to.get(Calendar.YEAR) && from.get(Calendar.MONTH) > to.get(Calendar.MONTH))))		
-		{
-        	long bottom = from.getTimeInMillis()/1000;
-            from.set(this.historyStartYear, month+1, 1, 0, 0, 0);
-		    long top = from.getTimeInMillis()/1000;
-		    fbdslist.add(auditRecordDao.getBarDiagramStatisticsForProjectSet(projects, "" + (from.get(Calendar.MONTH) + 1), ""+ from.get(Calendar.YEAR)));
-		    month += 1;
-		    from.set(this.historyStartYear, month, 1, 0, 0, 0);
-		}
-		if(currMonthInRange) //get the data for the current month
-		{
-			from.set(currYear, currMonth, 1, 0, 0, 0);
-			long bottom = from.getTimeInMillis()/1000;
-            from.set(currYear, currMonth+1, 1, 0, 0, 0);
-		    long top = from.getTimeInMillis()/1000;
-		    fbdslist.add(auditRecordDao.getBarDiagramStatisticsForProjectSetCurr(projects,""+bottom ,""+((System.currentTimeMillis()-86400000)/1000), ""+top));
-		}
         for (Future<BarDiagramStatistics> fbds : fbdslist) {
         	bdslist.add(fbds.get());
         }
