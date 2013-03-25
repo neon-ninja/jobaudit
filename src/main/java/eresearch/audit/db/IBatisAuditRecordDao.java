@@ -1,7 +1,7 @@
 package eresearch.audit.db;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
+//import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,6 +14,7 @@ import eresearch.audit.pojo.BarDiagramStatistics;
 import eresearch.audit.pojo.UserStatistics;
 
 import org.apache.log4j.Logger;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
 
 public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements AuditRecordDao {
@@ -51,8 +52,9 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		String high = ""+(to.getTimeInMillis()/1000);
 		String mid = null;
 		
-		int currMonth = new GregorianCalendar().get(Calendar.MONTH);
-		int currYear = new GregorianCalendar().get(Calendar.YEAR);
+		Calendar now = Calendar.getInstance();
+		int currMonth = now.get(Calendar.MONTH);
+		int currYear = now.get(Calendar.YEAR);
 		String mmFrom=null;
 		String mmTo=null;
 		
@@ -121,20 +123,25 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 			}
 		);
 	}
-
+	
 	public Future<List<UserStatistics>> getStatisticsForProjectSet(final List<String> projects, final Calendar from, final Calendar to) throws Exception {
 		String high = ""+(to.getTimeInMillis()/1000);
 		String mid = null;
 		
-		int currMonth = new GregorianCalendar().get(Calendar.MONTH);
-		int currYear = new GregorianCalendar().get(Calendar.YEAR);
+//		int currMonth = new GregorianCalendar().get(Calendar.MONTH);
+//		int currYear = new GregorianCalendar().get(Calendar.YEAR);
+		
+		Calendar now = Calendar.getInstance();
+		int currMonth = now.get(Calendar.MONTH);
+		int currYear = now.get(Calendar.YEAR);
+		
 		String mmFrom=null;
 		String mmTo=null;
 		
 		//if the selected date range overlaps with past 24 hours' time span
 		if((to.getTimeInMillis())>(System.currentTimeMillis()-86400000)){
 			mid=""+((System.currentTimeMillis()-86400000)/1000);
-
+			
 			Calendar newTo = Calendar.getInstance();
 			newTo.set(currYear, currMonth-1, 1, 0, 0, 0);
 			Calendar curr=Calendar.getInstance();
@@ -142,7 +149,6 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 			
 			mmFrom=""+(from.get(Calendar.MONTH)+1);
 			mmTo=""+(newTo.get(Calendar.MONTH)+1);
-			
 			return getStatisticsForProjectSet(projects, ""+(curr.getTimeInMillis()/1000), mid, high,""+from.get(Calendar.YEAR)+(mmFrom.length()==1?"0"+mmFrom:mmFrom), ""+newTo.get(Calendar.YEAR)+(mmTo.length()==1?"0"+mmTo:mmTo));
 		}
 		else{
@@ -196,6 +202,57 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 			}
 		);
 	}
+	
+	public List<Future<BarDiagramStatistics>> getBarDiagramUserStatistics(final List<String> userlist,
+			Integer startYear, Integer startMonth, 
+			Integer endYear, Integer endMonth) throws Exception{
+		List<Future<BarDiagramStatistics>> fbdslist = new LinkedList<Future<BarDiagramStatistics>>();
+		
+		Calendar from = Calendar.getInstance();
+		Calendar to= Calendar.getInstance();
+		
+//		int currMonth = new GregorianCalendar().get(Calendar.MONTH);
+//		int currYear = new GregorianCalendar().get(Calendar.YEAR);
+		
+		int currMonth = from.get(Calendar.MONTH);
+		int currYear = from.get(Calendar.YEAR);
+		
+		//get the bar diagram statistics
+		to.set(endYear, endMonth, 1,0,0,0);
+		int month = startMonth;
+		
+		boolean currMonthInRange=false; 
+		//if current month lies in the range of the selected time period
+		if((to.get(Calendar.YEAR)>currYear) || (to.get(Calendar.MONTH) >= currMonth) && (to.get(Calendar.YEAR) ==currYear))	{
+			currMonthInRange=true;
+			to.set(currYear, currMonth-1,1,0,0,0);
+		}
+		
+		from.set(startYear, month, 1, 0, 0, 0);
+		while ((from.get(Calendar.YEAR) <= to.get(Calendar.YEAR) && 
+			!(from.get(Calendar.YEAR) == to.get(Calendar.YEAR) && from.get(Calendar.MONTH) > to.get(Calendar.MONTH))))		
+		{
+			if (userlist.size() < 1) {
+				fbdslist.add(getBarDiagramStatisticsForAllUsers(
+						"" + (from.get(Calendar.MONTH) + 1),"" + from.get(Calendar.YEAR)));
+			} else {
+				fbdslist.add(getBarDiagramStatisticsForUserSet(
+						userlist, "" + (from.get(Calendar.MONTH) + 1), ""+ from.get(Calendar.YEAR)));
+			}
+		    month += 1;
+		    from.set(startYear, month, 1, 0, 0, 0);
+		}
+		if(currMonthInRange) //get the data for the current month
+		{
+			from.set(currYear, currMonth, 1, 0, 0, 0);
+			long bottom = from.getTimeInMillis()/1000;
+            from.set(currYear, currMonth+1, 1, 0, 0, 0);
+		    long top = from.getTimeInMillis()/1000;
+		    fbdslist.add(getBarDiagramStatisticsForUserSetCurr(userlist,""+bottom ,""+((System.currentTimeMillis()-86400000)/1000), ""+top));
+		}
+		
+		return fbdslist;		
+	}
 
 	//get bar diagram statistics for data up to previous month
 	public Future<BarDiagramStatistics> getBarDiagramStatisticsForAllUsers(final String bottom, final String top) throws Exception {
@@ -238,6 +295,8 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		);
 	}
 	
+	
+	
 	public Future<BarDiagramStatistics> getBarDiagramStatisticsForUserSet(final List<String> uids, final String bottom, final String top) throws Exception {
 		return this.executorService.submit(
 			new Callable<BarDiagramStatistics>() {
@@ -265,7 +324,72 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		);
 	}
 	
+	//temp start
+	
+		public List<Future<BarDiagramStatistics>> getProjectStats(final List<String> projects,
+				Integer startYear, Integer startMonth, 
+				Integer endYear, Integer endMonth) throws Exception{
+			List<Future<BarDiagramStatistics>> fbdslist = new LinkedList<Future<BarDiagramStatistics>>();
+
+			Calendar from = Calendar.getInstance();
+			Calendar to= Calendar.getInstance();
+			int currMonth = from.get(Calendar.MONTH);
+			int currYear = from.get(Calendar.YEAR);
+			
+			//get the bar diagram statistics
+			to.set(endYear, endMonth, 1,0,0,0);
+			int month = startMonth;
+			
+			boolean currMonthInRange=false; 
+			//if current month lies in the range of the selected time period
+			//and set the end month/year to the current month/year
+			if((to.get(Calendar.YEAR)>currYear) || (to.get(Calendar.MONTH) >= currMonth) && (to.get(Calendar.YEAR) ==currYear))	{
+				currMonthInRange=true;
+				to.set(currYear, currMonth-1,1,0,0,0);
+			}
+			
+			//while ((from.get(Calendar.YEAR) <= to.get(Calendar.YEAR) && !(from.get(Calendar.YEAR) == to.get(Calendar.YEAR) && from.get(Calendar.MONTH) > to.get(Calendar.MONTH)))) {
+		//	from.set(startYear, month, 1, 0, 0, 0);
+			from.set(startYear, month, 1, 0, 0, 0);
+			
+			System.out.println("setvals:"+from.get(Calendar.YEAR)+"/"+from.get(Calendar.MONDAY));			
+			System.out.println("setvals:"+to.get(Calendar.YEAR)+"/"+to.get(Calendar.MONDAY));
+
+			//for time-span (months) before current month
+			while ((from.get(Calendar.YEAR) <= to.get(Calendar.YEAR) && 
+				!(from.get(Calendar.YEAR) == to.get(Calendar.YEAR) && from.get(Calendar.MONTH) > to.get(Calendar.MONTH))))		
+			{
+	        	//long bottom = from.getTimeInMillis()/1000;
+	            //from.set(startYear, month+1, 1, 0, 0, 0);
+			  //  long top = from.getTimeInMillis()/1000;
+			    fbdslist.add(getBarDiagramStatisticsForProjectSet(projects, "" + (from.get(Calendar.MONTH) + 1), ""+ from.get(Calendar.YEAR)));
+			    month += 1;
+			  //  from.set(startYear, month+1, 1, 0, 0, 0);
+			    from.set(startYear, month, 1, 0, 0, 0);
+			}
+			//for current month
+			if(currMonthInRange) //get the data for the current month
+			{
+				from.set(currYear, currMonth, 1, 0, 0, 0);
+				long bottom = from.getTimeInMillis()/1000;
+	            from.set(currYear, currMonth+1, 1, 0, 0, 0);
+			    long top = from.getTimeInMillis()/1000;
+			    fbdslist.add(getBarDiagramStatisticsForProjectSetCurr(projects,""+bottom ,""+((System.currentTimeMillis()-86400000)/1000), ""+top));
+			}
+			
+			return fbdslist;
+			
+		}
+//		(final List<String> projects, final String bottom, final String top)
+//		(final List<String> projects, final String bottom, final String mid, final String top)
+//		currMonthInRange
+//		{
+//			if()
+//		}
+	//temp end	
+	
 	public Future<BarDiagramStatistics> getBarDiagramStatisticsForProjectSet(final List<String> projects, final String bottom, final String top) throws Exception {
+		
 		return this.executorService.submit(
 			new Callable<BarDiagramStatistics>() {
 				public BarDiagramStatistics call() throws Exception {
