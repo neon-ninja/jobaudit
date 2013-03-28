@@ -32,7 +32,8 @@ public class StatisticsProjectController extends StatisticsController {
 		
 		//get the list of projects, depending on the value selected in project dropdown
 		List<String> projects = this.createProjectList(request, mav);
-		Future<List<UserStatistics>> fprojectstats;
+		//rf Future<List<UserStatistics>> fprojectstats;
+		List<UserStatistics> fprojectstats;
 
 		Calendar from = Calendar.getInstance();
 		Calendar to= Calendar.getInstance();
@@ -41,6 +42,7 @@ public class StatisticsProjectController extends StatisticsController {
 		to.set(super.historyEndYear, super.historyEndMonth+1, 1,0,0,0);		
 
 		//get statistics
+		//rf fprojectstats = this.auditRecordDao.getStatisticsForProjectSet(projects, from, to);
 		fprojectstats = this.auditRecordDao.getStatisticsForProjectSet(projects, from, to);
 		
 		List<Future<BarDiagramStatistics>> fbdslist = new LinkedList<Future<BarDiagramStatistics>>();
@@ -55,7 +57,8 @@ public class StatisticsProjectController extends StatisticsController {
         for (Future<BarDiagramStatistics> fbds : fbdslist) {
         	bdslist.add(fbds.get());
         }
-		mav.addObject("user_statistics", fprojectstats.get());
+//rf		mav.addObject("user_statistics", fprojectstats.get());
+        mav.addObject("user_statistics", fprojectstats);
 		mav.addObject("job_statistics", bdslist);
 		mav.addObject("startYear", historyStartYear);
 		mav.addObject("startMonth", historyStartMonth);

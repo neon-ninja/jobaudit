@@ -14,8 +14,11 @@ public interface AuditRecordDao {
 	public Future<Integer> getNumberRecords(String user) throws Exception;
 	public Future<List<String>> getProjectNames() throws Exception;
 	public Future<List<String>> getAuditYears() throws Exception;
-	public Future<List<UserStatistics>> getStatisticsForUser(List<String> users, Calendar from, Calendar to) throws Exception;
-	public Future<List<UserStatistics>> getStatisticsForProjectSet(List<String> projects, Calendar from, Calendar to) throws Exception;
+//rf	public Future<List<UserStatistics>> getStatisticsForUser(List<String> users, Calendar from, Calendar to) throws Exception;
+	public List<UserStatistics> getStatisticsForUser(List<String> users, Calendar from, Calendar to) throws Exception;
+	
+	//rf public Future<List<UserStatistics>> getStatisticsForProjectSet(List<String> projects, Calendar from, Calendar to) throws Exception;
+	public List<UserStatistics> getStatisticsForProjectSet(List<String> projects, Calendar from, Calendar to) throws Exception;
 	public Future<BarDiagramStatistics> getBarDiagramStatisticsForProjectSetCurr(List<String> projects, String bottom, String mid, String top) throws Exception;
 	public Future<BarDiagramStatistics> getBarDiagramStatisticsForAllUsers(String bottom, String top) throws Exception;
 	public Future<BarDiagramStatistics> getBarDiagramStatisticsForUserSet(List<String> uids, String bottom, String top) throws Exception;
