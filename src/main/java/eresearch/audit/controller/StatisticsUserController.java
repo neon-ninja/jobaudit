@@ -36,7 +36,8 @@ public class StatisticsUserController extends StatisticsController {
 		List<String> userlist = this.createUserList(request);
 
 		//time period related changes
-		Future<List<UserStatistics>> uslist;
+//rf		Future<List<UserStatistics>> uslist;
+		List<UserStatistics> uslist;
 		
 		from.set(super.historyStartYear, super.historyStartMonth, 1,0,0,0);
 		to.set(super.historyEndYear, super.historyEndMonth+1, 1,0,0,0);
@@ -44,7 +45,8 @@ public class StatisticsUserController extends StatisticsController {
 		//get statistics
 		uslist=this.auditRecordDao.getStatisticsForUser(userlist, from, to);
 		// collect information from futures
-		userstatslist=uslist.get();
+//		userstatslist=uslist.get();
+		userstatslist=uslist;
 		
 		userlist=new LinkedList<String>();
 		for(UserStatistics stats: userstatslist){

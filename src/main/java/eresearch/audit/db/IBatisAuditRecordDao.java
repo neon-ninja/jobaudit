@@ -48,7 +48,7 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		);
 	}
 	
-	public Future<List<UserStatistics>> getStatisticsForUser(final List<String> userlist, final Calendar from, final Calendar to) throws Exception {		
+	public List<UserStatistics> getStatisticsForUser(final List<String> userlist, final Calendar from, final Calendar to) throws Exception {		
 		String high = ""+(to.getTimeInMillis()/1000);
 		String mid = null;
 		
@@ -80,10 +80,11 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 	}	
 
 	//get statistics for data older than 24 hours
-	public Future<List<UserStatistics>> getStatisticsForUser(final List<String> users, final String bottom, final String top) throws Exception {
-		return this.executorService.submit(
-			new Callable<List<UserStatistics>>() {
-				public List<UserStatistics> call() throws Exception {
+//rf	public Future<List<UserStatistics>> getStatisticsForUser(final List<String> users, final String bottom, final String top) throws Exception {
+	public List<UserStatistics> getStatisticsForUser(final List<String> users, final String bottom, final String top) throws Exception {	
+//rf		return this.executorService.submit(
+//rf			new Callable<List<UserStatistics>>() {
+//rf				public List<UserStatistics> call() throws Exception {
 					List<UserStatistics> list = null;
 					if (users == null || users.size() == 0) {
 						list = new LinkedList<UserStatistics>();
@@ -95,16 +96,17 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 						list = (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForUser", params);
 					}
 					return list;
-				}
-			}
-		);
+//rf				}
+//rf			}
+//rf		);
 	}
 	
 	//get statisctics for past 24 hours' data
-	public Future<List<UserStatistics>> getStatisticsForUser(final List<String> users, final String bottom, final String mid, final String top, final String start, final String end) throws Exception {
-		return this.executorService.submit(
-			new Callable<List<UserStatistics>>() {
-				public List<UserStatistics> call() throws Exception {
+//rf	public Future<List<UserStatistics>> getStatisticsForUser(final List<String> users, final String bottom, final String mid, final String top, final String start, final String end) throws Exception {
+	public List<UserStatistics> getStatisticsForUser(final List<String> users, final String bottom, final String mid, final String top, final String start, final String end) throws Exception {
+//rf	return this.executorService.submit(
+//rf			new Callable<List<UserStatistics>>() {
+//rf				public List<UserStatistics> call() throws Exception {
 					List<UserStatistics> list = null;
 					if (users == null || users.size() == 0) {
 						list = new LinkedList<UserStatistics>();
@@ -119,12 +121,13 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 				    	list = (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForUserLatest", params);
 					}
 					return list;
-				}
-			}
-		);
+//rf				}
+//rf			}
+//rf		);
 	}
 	
-	public Future<List<UserStatistics>> getStatisticsForProjectSet(final List<String> projects, final Calendar from, final Calendar to) throws Exception {
+//rf	public Future<List<UserStatistics>> getStatisticsForProjectSet(final List<String> projects, final Calendar from, final Calendar to) throws Exception {
+	public List<UserStatistics> getStatisticsForProjectSet(final List<String> projects, final Calendar from, final Calendar to) throws Exception {
 		String high = ""+(to.getTimeInMillis()/1000);
 		String mid = null;
 		
@@ -149,7 +152,8 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 			
 			mmFrom=""+(from.get(Calendar.MONTH)+1);
 			mmTo=""+(newTo.get(Calendar.MONTH)+1);
-			return getStatisticsForProjectSet(projects, ""+(curr.getTimeInMillis()/1000), mid, high,""+from.get(Calendar.YEAR)+(mmFrom.length()==1?"0"+mmFrom:mmFrom), ""+newTo.get(Calendar.YEAR)+(mmTo.length()==1?"0"+mmTo:mmTo));
+			//return getStatisticsForProjectSet(projects, ""+(curr.getTimeInMillis()/1000), mid, high,""+from.get(Calendar.YEAR)+(mmFrom.length()==1?"0"+mmFrom:mmFrom), ""+newTo.get(Calendar.YEAR)+(mmTo.length()==1?"0"+mmTo:mmTo));
+			return getStatisticsForProjectSet(projects, ""+(curr.getTimeInMillis()/1000), mid, high,""+from.get(Calendar.YEAR)+(mmFrom.length()==1?"0"+mmFrom:mmFrom), ""+newTo.get(Calendar.YEAR)+(mmTo.length()==1?"0"+mmTo:mmTo));			
 		}
 		else{
 			mmFrom=""+(from.get(Calendar.MONTH)+1);
@@ -159,10 +163,11 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 	}	
 	
 	//get statistics for data older than 24 hours
-	public Future<List<UserStatistics>> getStatisticsForProjectSet(final List<String> projects, final String bottom, final String top) throws Exception {
-		return this.executorService.submit(
-			new Callable<List<UserStatistics>>() {
-				public List<UserStatistics> call() throws Exception {
+//rf	public Future<List<UserStatistics>> getStatisticsForProjectSet(final List<String> projects, final String bottom, final String top) throws Exception {
+		public List<UserStatistics> getStatisticsForProjectSet(final List<String> projects, final String bottom, final String top) throws Exception {	
+//rf		return this.executorService.submit(
+//rf			new Callable<List<UserStatistics>>() {
+//rf				public List<UserStatistics> call() throws Exception {
 					List<UserStatistics> list = null;
 					if (projects == null || projects.size() == 0) {
 						list = new LinkedList<UserStatistics>();
@@ -174,16 +179,17 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 						list = (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForProjectSet", params);
 					}
 					return list;
-				}
-			}
-		);
+//rf				}
+//rf			}
+//rf		);
 	}
 
 	//get statistics for past 24 hours' data
-	public Future<List<UserStatistics>> getStatisticsForProjectSet(final List<String> projects, final String bottom, final String mid, final String top, final String start, final String end) throws Exception {
-		return this.executorService.submit(
-			new Callable<List<UserStatistics>>() {
-				public List<UserStatistics> call() throws Exception {
+//rf	public Future<List<UserStatistics>> getStatisticsForProjectSet(final List<String> projects, final String bottom, final String mid, final String top, final String start, final String end) throws Exception {
+	public List<UserStatistics> getStatisticsForProjectSet(final List<String> projects, final String bottom, final String mid, final String top, final String start, final String end) throws Exception {	
+//rf		return this.executorService.submit(
+//rf			new Callable<List<UserStatistics>>() {
+//rf				public List<UserStatistics> call() throws Exception {
 					List<UserStatistics> list = null;
 					if (projects == null || projects.size() == 0) {
 						list = new LinkedList<UserStatistics>();
@@ -198,9 +204,9 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 						list = (List<UserStatistics>) getSqlMapClientTemplate().queryForList("getStatisticsForProjectSetLatest", params);
 					}
 					return list;
-				}
-			}
-		);
+//rf				}
+//rf			}
+		//);
 	}
 	
 	public List<Future<BarDiagramStatistics>> getBarDiagramUserStatistics(final List<String> userlist,
