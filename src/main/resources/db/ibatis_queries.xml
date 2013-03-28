@@ -274,7 +274,7 @@
         project,
         COUNT(*) AS jobs,
         SUM(grid_jobs) AS grid_jobs,
-      	SUM(total_grid_core_hours) AS total_grid_core_hours,
+      	TRUNCATE(SUM(total_grid_core_hours), 2) AS total_grid_core_hours,
         SUM(cores) AS total_cores,
         TRUNCATE(SUM(core_hours), 2) AS total_core_hours,
         TRUNCATE(SUM(waiting_time), 2) AS total_waiting_time,
