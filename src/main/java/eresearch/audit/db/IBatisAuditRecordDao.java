@@ -357,9 +357,6 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 			//while ((from.get(Calendar.YEAR) <= to.get(Calendar.YEAR) && !(from.get(Calendar.YEAR) == to.get(Calendar.YEAR) && from.get(Calendar.MONTH) > to.get(Calendar.MONTH)))) {
 		//	from.set(startYear, month, 1, 0, 0, 0);
 			from.set(startYear, month, 1, 0, 0, 0);
-			
-			System.out.println("setvals:"+from.get(Calendar.YEAR)+"/"+from.get(Calendar.MONDAY));			
-			System.out.println("setvals:"+to.get(Calendar.YEAR)+"/"+to.get(Calendar.MONDAY));
 
 			//for time-span (months) before current month
 			while ((from.get(Calendar.YEAR) <= to.get(Calendar.YEAR) && 
