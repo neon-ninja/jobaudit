@@ -41,7 +41,7 @@ public class AuditRecordResource {
 		l.add(uid);
 		from.setTimeInMillis(Long.valueOf(bottom) * 1000);
 		to.setTimeInMillis(Long.valueOf(top) * 1000);
-		return (UserStatistics) this.auditRecordDao.getStatisticsForUser(l, from, to).get();
+		return (UserStatistics) this.auditRecordDao.getStatisticsForUser(l, from, to);
 	}
 
 	public void setAuditRecordDao(AuditRecordDao auditRecordDao) {
