@@ -57,6 +57,8 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		int currYear = now.get(Calendar.YEAR);
 		String mmFrom=null;
 		String mmTo=null;
+		int tempFrom;
+		int tempTo;
 		
 		//if the selected date range overlaps with past 24 hours' time span
 		if((to.getTimeInMillis())>(System.currentTimeMillis()-86400000)){
@@ -73,8 +75,13 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 			return getStatisticsForUser(userlist, ""+(curr.getTimeInMillis()/1000), mid, high,""+from.get(Calendar.YEAR)+(mmFrom.length()==1?"0"+mmFrom:mmFrom), ""+newTo.get(Calendar.YEAR)+(mmTo.length()==1?"0"+mmTo:mmTo));
 		}
 		else{
-			mmFrom=""+(from.get(Calendar.MONTH)+1);
-			mmTo=""+(to.get(Calendar.MONTH));
+			tempFrom=(from.get(Calendar.MONTH)+1);
+			tempTo=(to.get(Calendar.MONTH));
+			if(tempFrom>tempTo){ //1 month data
+				tempTo = tempFrom;
+			}
+			mmFrom = tempFrom+"";
+			mmTo = tempTo+"";
 			return getStatisticsForUser(userlist, ""+from.get(Calendar.YEAR)+(mmFrom.length()==1?"0"+mmFrom:mmFrom), ""+to.get(Calendar.YEAR)+(mmTo.length()==1?"0"+mmTo:mmTo));
 		}
 	}	
@@ -217,6 +224,11 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		Calendar from = Calendar.getInstance();
 		Calendar to= Calendar.getInstance();
 		
+		System.out.println(startYear);
+		System.out.println(startMonth);
+		System.out.println(endYear);
+		System.out.println(endMonth);
+		
 //		int currMonth = new GregorianCalendar().get(Calendar.MONTH);
 //		int currYear = new GregorianCalendar().get(Calendar.YEAR);
 		
@@ -247,6 +259,7 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 			}
 		    month += 1;
 		    from.set(startYear, month, 1, 0, 0, 0);
+		    System.out.println("month:"+month);
 		}
 		if(currMonthInRange) //get the data for the current month
 		{
@@ -464,5 +477,15 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 			}
 		});
 	}
-
+	
+	
+//For Reporting queries	
+	
+	public String getTotalCoreHoursInterval(String start, String end) throws Exception {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("start", start);
+		params.put("end", end);
+		return (String) getSqlMapClientTemplate().queryForObject("getTotalCoreHoursInterval", params);
+	}	
+	
 }

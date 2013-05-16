@@ -443,4 +443,35 @@
       FROM_UNIXTIME(DONE,'%Y') <![CDATA[ > ]]> 1970; 
   </select>
   
+
+
+  
+<!-- Queries for report generation -->
+
+<select id="getDepartmentInfo" parameterClass="java.lang.String" resultClass="eresearch.audit.pojo.Department">
+	SELECT 
+	deptname AS departmentName,
+	deptshort AS affiliation,
+	investment AS investment
+	FROM 
+	department_info
+	WHERE
+	deptshort like #affil#
+</select>
+  
+ <select id="getUserName" parameterClass="java.lang.String" resultClass="java.lang.String">
+ 	SELECT 
+ 	name 
+ 	from usermap 
+ 	where id like #upi#
+  </select>
+
+	<select id="getTotalCoreHoursInterval" parameterClass="java.util.Map" resultClass="java.lang.String">
+		SELECT SUM(IF(done>start,cores*(done - start),0)) 
+		FROM audit 
+		WHERE 
+		done BETWEEN #start# and #end#
+	</select>
 </sqlMap>
+
+

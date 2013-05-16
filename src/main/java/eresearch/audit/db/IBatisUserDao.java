@@ -15,6 +15,7 @@ import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
 import eresearch.audit.pojo.Affiliation;
+import eresearch.audit.pojo.Department;
 import eresearch.audit.pojo.User;
 import eresearch.audit.util.UserComparator;
 
@@ -58,6 +59,7 @@ public class IBatisUserDao extends SqlMapClientDaoSupport implements UserDao {
 		return this.executorService.submit(
 			new Callable<List<String>>() {
 				public List<String> call() throws Exception {
+					System.out.println("top:"+top+"bottom:"+bottom);
 					Map<String,Object> params=new HashMap<String, Object>();
 					params.put("top", top);
 					params.put("bottom", bottom);
@@ -150,6 +152,24 @@ public class IBatisUserDao extends SqlMapClientDaoSupport implements UserDao {
 			}
 		);
 	}
+	
+	
+//For Report generation queries	
+	
+	public Department getDepartmentDetails(String affil) throws Exception {
+//		return this.executorService.submit(
+//			new Callable<User>() {
+//				public User call() throws Exception {
+//					return (User) getSqlMapClientTemplate().queryForObject("getDepartmentInfo", affil);
+//				}
+//			}
+//		);
+		return (Department) getSqlMapClientTemplate().queryForObject("getDepartmentInfo", affil);
+	}
+
+	public String getUserName(String upi) throws Exception {
+		return (String) getSqlMapClientTemplate().queryForObject("getUserName", upi);
+	}	
 
 	public void setExecutorService(ExecutorService executorService) {
 		this.executorService = executorService;

@@ -1,0 +1,61 @@
+<assembly>
+	<id>binary</id>
+	<formats>
+		<format>jar</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<dependencySets>
+		<dependencySet>
+			<unpack>true</unpack>
+			<useTransitiveDependencies>true</useTransitiveDependencies>
+			<useTransitiveFiltering>true</useTransitiveFiltering>
+			<useProjectArtifact>true</useProjectArtifact>
+			<outputDirectory>/</outputDirectory>
+			<excludes>
+				<exclude>junit:junit</exclude>
+			</excludes>
+			<unpackOptions>
+				<excludes>
+					<exclude>**/INDEX.LIST</exclude>
+					<exclude>**/MANIFEST.MF</exclude>
+					<exclude>**/LICENSE.txt</exclude>
+					<exclude>**/NOTICE.txt</exclude>
+					<exclude>**/LICENSE</exclude>
+					<exclude>**/NOTICE</exclude>
+					<exclude>log4j.properties</exclude>
+					<exclude>log4j.xml</exclude>
+					<exclude>logback.xml</exclude>
+				</excludes>
+			</unpackOptions>
+		</dependencySet>
+	</dependencySets>
+
+	<!--to make sure the right log4j.properties file is used -->
+	<files>
+		<file>
+			<source>src/main/webapp/WEB-INF/audit-servlet.xml</source>
+			<outputDirectory>/</outputDirectory>
+		</file>
+				<file>
+			<source>src/main/webapp/WEB-INF/root-context.xml</source>
+			<outputDirectory>/</outputDirectory>
+		</file>
+		<file>
+			<source>src/main/webapp/WEB-INF/rest-audit-records-servlet.xml</source>
+			<outputDirectory>/</outputDirectory>
+		</file>
+ 
+		
+		
+	</files>
+<!-- 	<fileSets> -->
+<!-- 		<fileSet> -->
+<!-- 			<directory>target/jobaudit/WEB-INF/classes/eresearch/audit/report</directory> -->
+<!-- 			<includes> -->
+<!-- 				<include>**/ReportTest.class</include> -->
+<!-- 			</includes> -->
+<!-- 			<outputDirectory>WEB-INF/classes</outputDirectory> -->
+<!-- 		</fileSet> -->
+<!-- 	</fileSets> -->
+
+</assembly>
