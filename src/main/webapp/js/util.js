@@ -37,7 +37,7 @@ function draw_2clustered_bar_diagram(divid, data) {
     xaxis: {
       tickFormatter: function(x) {
     	if (x>=1000) {
-    		return (x/1000).toFixed(1) + "K";
+    		return (x/1000).toFixed(0) + "K";
     	} else {
     		return x.toFixed(2);
     	}
@@ -118,7 +118,7 @@ function draw_stacked_bar_diagram(divid, data) {
     xaxis: {
       tickFormatter: function(x) {
           if (x>=1000) {
-        	  return (x/1000).toFixed(1) + "K";
+        	  return (x/1000).toFixed(0) + "K";
           } else {
         	  return x.toFixed(2);
           }

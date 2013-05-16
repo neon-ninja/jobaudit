@@ -26,15 +26,16 @@ AS
 
 CREATE INDEX user_index ON audit_user_prev(user);
 
-
-
 DROP TABLE IF EXISTS audit_project_prev; 
 
 CREATE TABLE audit_project_prev
 AS
-  SELECT account AS project,
+  SELECT
+    account AS project,
     user as user,
     COUNT(*) AS jobs,
+    SUM(IF(executable LIKE '%.globus%', 1, 0)) AS grid_jobs,
+    TRUNCATE(SUM(IF(executable LIKE '%.globus%', IF(done>start, CORES*(done-start)/3600,0), 0)), 2) AS total_grid_core_hours,
     SUM(cores) As total_cores,
     SUM(IF(done>start, cores*(done-start)/3600,0)) AS core_hours,
     SUM(IF(start>qtime,(start-qtime)/3600,0)) AS waiting_time,

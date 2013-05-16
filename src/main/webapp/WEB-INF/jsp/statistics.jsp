@@ -75,19 +75,6 @@
     	}
     }
     
-//     function getParameterByName(name) {
-//     	name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-//     	var regexS = "[\\?&]" + name + "=([^&#]*)";
-//     	var regex = new RegExp(regexS);
-//     	var results = regex.exec(window.location.search);
-//     	if(results == null) {
-//     		return "";
-//     	} else {
-//             return decodeURIComponent(results[1].replace(/\+/g, " "));    		
-//     	}
-// 		return "";
-//     }
-
     function build_initial_selects() {
 
     	//retrieve the dropdown values passed in the request (for retaining the selections)
@@ -175,7 +162,16 @@
 
     $(document).ready(function() {
     	build_initial_selects();
-        $("#statistics").tablesorter({widgets:['zebra'], sortList:[[5,1]]});
+        $("#statistics").tablesorter({widgets:['zebra'], sortList:[[6,1]], headers: {0: {sorter:false}}});
+        var table = $("#statistics"); 
+        table.bind("sortEnd",function() { 
+            var i = 1;
+            table.find("tr:gt(0)").each(function(){
+                $(this).find("td:eq(0)").text(i);
+                i++;
+            });
+        });      
+
     });
   </script>
 </head>
@@ -355,6 +351,7 @@
     <b>Per user:</b>
     <table id="statistics" class="tablesorter"><thead>
       <tr>
+        <th>#</th>
         <th>User Name</th>
         <th>User ID</th>
         <th>Jobs</th>
@@ -370,6 +367,7 @@
     <c:forEach items="${user_statistics}" var="statistics">
   	  <c:set var="avgWaitingTime" value="${statistics.total_waiting_time/statistics.jobs}" />
       <tr>
+        <td>&nbsp;</td>
         <td><a href="<%=request.getContextPath()%>/html/userrecords?upi=${statistics.user}">
             <script type="text/javascript">document.write(usermap["${statistics.user}"]);</script></a></td> 
         <td><a href="<%=request.getContextPath()%>/html/userrecords?upi=${statistics.user}">${statistics.user}</a></td> 
