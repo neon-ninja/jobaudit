@@ -25,8 +25,10 @@ public class ReportTest {
 						"rest-audit-records-servlet.xml" });
 		ReportUtils r = (ReportUtils) appContext.getBean("reportUtils");
 
+//		try{
 		new JCommander(r, args);
-
+//		}
+//		catch()
 //		try {
 //			r.getReportContent(null, r.getHistoryStartYear(),
 //					r.getHistoryStartMonth()-1, r.getHistoryEndYear(),
@@ -52,7 +54,8 @@ public class ReportTest {
 			r.createReport(us, bds);
 		} catch (Exception e) {
 			//e.printStackTrace();
-			System.out.println(e.getMessage());
+			//System.out.println(e.getMessage());
+			System.out.println("invalid parameters");
 		}
 		
 		try {
