@@ -288,6 +288,13 @@ public class ReportUtils {
 		**/
 
 //		document.open();
+		
+		
+		Boolean startDateJan2012=false;
+		
+		if(historyStartMonth==0 && historyStartYear==2012){
+			startDateJan2012=true;
+		}
 
 		document.addTitle("Report");
 		Paragraph title = new Paragraph("Report", FontFactory.getFont(
@@ -352,6 +359,18 @@ public class ReportUtils {
 
 			int monthCount = historyStartMonth;
 			int yearCount = historyStartYear;
+			
+			if(!startDateJan2012){
+				int diff = historyStartMonth-4;
+				if(diff<0){
+					monthCount =diff+11;
+					yearCount-=1;
+				}
+				else{
+					monthCount=diff;
+				}
+			}
+			
 			String monthName = null;
 			for (BarDiagramStatistics bs : bdslist) {
 
@@ -451,11 +470,6 @@ public class ReportUtils {
 			
 			Paragraph p2=null;
 			
-			Boolean startDateJan2012=false;
-			
-			if(historyStartMonth==0 && historyStartYear==2012){
-				startDateJan2012=true;
-			}
 		
 		
 			if((historyStartMonth!=historyEndMonth)&&(historyStartYear!=historyEndYear)){
