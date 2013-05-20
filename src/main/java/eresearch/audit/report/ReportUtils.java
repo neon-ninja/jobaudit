@@ -7,10 +7,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormatSymbols;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Future;
 
 import org.apache.commons.lang.StringUtils;
@@ -282,6 +284,7 @@ public class ReportUtils {
 		long start = System.currentTimeMillis();
 		
 		DateFormatSymbols dfSym = new DateFormatSymbols();
+		NumberFormat numform=NumberFormat.getIntegerInstance(Locale.US);
 
 		Boolean startDateJan2012=false;
 		
@@ -385,7 +388,7 @@ public class ReportUtils {
 			table.setSpacingBefore(20);
 			table.setSpacingAfter(10);
 
-			DecimalFormat decFormat = new DecimalFormat("#.##");
+			DecimalFormat decFormat = new DecimalFormat("#.#");
 			DecimalFormat dec4Format = new DecimalFormat("#");
 			Double jobDouble;
 			Double coreHourDouble;
@@ -430,24 +433,26 @@ public class ReportUtils {
 				table_cell.setPadding(5);
 				table.addCell(table_cell);
 
+				coreHourDouble = Double.parseDouble(temp.getTotal_core_hours());
+				
 				table_cell = new PdfPCell(
-						new Phrase(temp.getTotal_core_hours()));
+						new Phrase(numform.format(coreHourDouble)));
 				table_cell.setPadding(5);
 				table.addCell(table_cell);
 
 				jobDouble = Double.parseDouble(temp.getJobs());
-				coreHourDouble = Double.parseDouble(temp.getTotal_core_hours());
+				
 //				System.out.println("core hours:" + coreHourDouble);
 
 				table_cell = new PdfPCell(new Phrase(Double.valueOf(decFormat
-						.format((coreHourDouble * 100) / coreHourCount)) + "%"));
+						.format((coreHourDouble * 100) / coreHourCount)) + ""));
 				table_cell.setPadding(5);
 				table.addCell(table_cell);
 
 				table_cell = new PdfPCell(new Phrase(
-						(Double.valueOf(dec4Format
-								.format((coreHourDouble * 100)
-										/ clusterCoreHours)) + "%")));
+						(Double.valueOf(decFormat
+								.format((coreHourDouble * 360000)
+										/ clusterCoreHours)) + ""))); //clusterCoreHours value is in seconds and needs to be divided by 3600
 				table_cell.setPadding(5);
 				table.addCell(table_cell);
 			}
@@ -521,9 +526,10 @@ public class ReportUtils {
 			//	clusterUsage.setFont(arg0)
 //			}
 
-			clusterUsage.add(String.format("%s %10s", "\nNumber of Jobs:\t\t", jobCount));
-			clusterUsage.add(String.format("%s %20s", "\nCore Hours:\t\t",
-					 Double.valueOf(decFormat.format(coreHourCount))));
+			clusterUsage.add(String.format("%s %10s", "\nNumber of Jobs:   ", jobCount));
+			clusterUsage.add(String.format("%s %20s", "\nCore Hours:   ",
+//					 Double.valueOf(decFormat.format(coreHourCount))));
+					 numform.format(coreHourCount)));
 		//	document.add(reportTitle);
 			
 			if(!startDateJan2012){	
@@ -544,8 +550,8 @@ public class ReportUtils {
 //				deptDets.add("\nAccumulated monthly core hours: "
 //						+ Double.valueOf(decFormat.format(coreHourCount)));
 
-				clusterUsage.add(String.format("%s %30s", "\nROI¹:\t\t", Double.valueOf(dec4Format.format(coreHourCount * 100
-								/ availCoreHours)) + "%"));
+				clusterUsage.add(String.format("%s %30s", "\nROI¹:", numform.format(coreHourCount * 100
+								/ availCoreHours)) + "%");
 
 //				document.add(deptDets);
 			}
@@ -609,7 +615,7 @@ public class ReportUtils {
 
 //			if((historyStartMonth==0) && (historyStartYear == 2012)){
 			if(startDateJan2012){
-				graphTitle = new Paragraph("Statistics since 2012/01", FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
+				graphTitle = new Paragraph("Statistics since January 2012", FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
 			}
 			else{
 				graphTitle = new Paragraph("Statistics for past 5 months", FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
