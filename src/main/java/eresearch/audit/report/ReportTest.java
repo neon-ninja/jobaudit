@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 
 import eresearch.audit.controller.StatisticsController;
 import eresearch.audit.db.UserDao;
@@ -25,10 +26,13 @@ public class ReportTest {
 						"rest-audit-records-servlet.xml" });
 		ReportUtils r = (ReportUtils) appContext.getBean("reportUtils");
 
-//		try{
+		try{
 		new JCommander(r, args);
-//		}
-//		catch()
+		}
+		catch(ParameterException pe){
+			System.out.println("Invalid parameters");
+			System.exit(0);
+		}
 //		try {
 //			r.getReportContent(null, r.getHistoryStartYear(),
 //					r.getHistoryStartMonth()-1, r.getHistoryEndYear(),
@@ -41,8 +45,12 @@ public class ReportTest {
 //			//e.printStackTrace();
 //			System.out.println(e.getMessage());
 //		}
-		
+		try{
 		r.initReport();
+		}catch(Exception e){
+			System.exit(0);
+		}
+		
 		
 		try {
 			r.getReportContent(null, r.getHistoryStartYear(),

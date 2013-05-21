@@ -74,7 +74,7 @@ public class ReportUtils {
 
 	
 	
-	public void initReport(){
+	public void initReport() throws Exception{
 		
 		 document = new Document();
 		
@@ -95,9 +95,15 @@ public class ReportUtils {
 		try {
 			dept = userDao.getDepartmentDetails(department);
 		} catch (Exception e1) {
-			e1.printStackTrace();
+			//e1.printStackTrace();
+			System.out.println("Department information missing.");
 		}
 		
+		if(dept==null){
+			System.out.println("Department information missing.");
+			throw new Exception();
+		}
+			
 		document.open();
 		
 		Paragraph reportTitle;
@@ -130,8 +136,9 @@ public class ReportUtils {
 			reportTitle = new Paragraph("NeSI Pan Cluster Usage Report"
 //				+ dept.getDepartmentName()
 				, FontFactory.getFont(
-				FontFactory.HELVETICA, 18, Font.BOLD, new Color(39, 64,
-						139)));
+//				FontFactory.HELVETICA, 18, Font.BOLD, new Color(39, 64,
+//						139)));
+				FontFactory.HELVETICA, 18, Font.BOLD, Color.BLACK));
 		
 			try {
 				reportTitle.setAlignment(1);
@@ -139,8 +146,9 @@ public class ReportUtils {
 				document.add(reportTitle);
 				
 				reportTitle = new Paragraph(dept.getDepartmentName(), FontFactory.getFont(
-						FontFactory.HELVETICA, 16, Font.NORMAL, new Color(39, 64,
-								139)));
+//						FontFactory.HELVETICA, 16, Font.NORMAL, new Color(39, 64,
+//								139)));
+				FontFactory.HELVETICA, 16, Font.NORMAL, Color.BLACK));
 				
 				reportTitle.setSpacingAfter(30);
 				reportTitle.setAlignment(1);
@@ -317,31 +325,43 @@ public class ReportUtils {
 
 		PdfPTable table = new PdfPTable(5);
 		table.setHeaderRows(1);
+		float[] columnWidths = new float[]{30f, 10f, 10f, 10f, 10f};
+		try {
+			table.setWidths(columnWidths);
+		} catch (DocumentException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 
 		PdfPCell table_cell;
 
 		table_cell = new PdfPCell(new Phrase("Researcher"));
 		table_cell.setPadding(5);
+		table_cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		table_cell.setBackgroundColor(Color.GRAY);
 		table.addCell(table_cell);
 
 		table_cell = new PdfPCell(new Phrase("Jobs"));
 		table_cell.setPadding(5);
+		table_cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		table_cell.setBackgroundColor(Color.GRAY);
 		table.addCell(table_cell);
 
 		table_cell = new PdfPCell(new Phrase("Core hours"));
 		table_cell.setPadding(5);
+		table_cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		table_cell.setBackgroundColor(Color.GRAY);
 		table.addCell(table_cell);
 
 		table_cell = new PdfPCell(new Phrase("Group %"));
 		table_cell.setPadding(5);
+		table_cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		table_cell.setBackgroundColor(Color.GRAY);
 		table.addCell(table_cell);
 
 		table_cell = new PdfPCell(new Phrase("Cluster %"));
 		table_cell.setPadding(5);
+		table_cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		table_cell.setBackgroundColor(Color.GRAY);
 		table.addCell(table_cell);
 
@@ -441,6 +461,7 @@ public class ReportUtils {
 					table_cell = new PdfPCell(new Phrase(
 							userDao.getUserName(temp.getUser())));
 					table_cell.setPadding(5);
+					table_cell.setNoWrap(true);
 					table.addCell(table_cell);
 				} catch (Exception e) {
 					table.addCell(temp.getUser());
@@ -562,6 +583,7 @@ public class ReportUtils {
 				
 //				Paragraph deptDets = new Paragraph("\nCPU cores contributed by department: " + investment);
 //
+				if(investment>0){
 				long diffDays = (endtime - starttime) / (24 * 60 * 60 * 1000);
 //
 				long availCoreHours = investment * diffDays * 24;
@@ -571,11 +593,14 @@ public class ReportUtils {
 //				deptDets.add("\nAccumulated monthly core hours: "
 //						+ Double.valueOf(decFormat.format(coreHourCount)));
 
+				
 				clusterUsage.add(String.format("%s %30s", "\nROI¹:", numform.format(coreHourCount * 100
 								/ availCoreHours)) + "%");
-
+				}
 //				document.add(deptDets);
 			}
+			
+			p2.setSpacingBefore(30);
 			
 			document.add(p2);
 			document.add(clusterUsage);
@@ -592,13 +617,14 @@ public class ReportUtils {
 			document.add(table);
 		
 //Bar Diagrams		
-		
+if(startDateJan2012){		
 			PdfPTable barChartsTable = new PdfPTable(2);
 			
 			barChartsTable.getDefaultCell().setBorderWidth(0);
 //			System.out.println("barcharttableheight:"+barChartsTable.getDefaultCell().getHeight());
-			barChartsTable.getDefaultCell().setMinimumHeight(200);
+//			barChartsTable.getDefaultCell().setMinimumHeight(500);
 		
+			
 			JFreeChart chart = ChartFactory.createBarChart("User Statistics",
 					"User", "jobs", dataSet, PlotOrientation.HORIZONTAL, false,
 					true, false);
@@ -652,7 +678,13 @@ public class ReportUtils {
 //			barChartsTable.addCell(image);
 
 			// stacked chart for serial and parallel jobs (job count)
-			bufferedImage = stackedChart.createBufferedImage(500, 300);
+			if(startDateJan2012){
+				bufferedImage = stackedChart.createBufferedImage(500, 500);
+			}
+			else{
+				bufferedImage = stackedChart.createBufferedImage(500, 400);
+			}
+			
 			image = null;
 			try {
 				image = Image.getInstance(writer, bufferedImage, 1.0f);
@@ -680,7 +712,15 @@ public class ReportUtils {
 
 			stackedChart.getCategoryPlot().setRenderer(bsr);
 
-			bufferedImage = stackedChart.createBufferedImage(500, 300);
+//			bufferedImage = stackedChart.createBufferedImage(500, 500);
+			
+			if(startDateJan2012){
+				bufferedImage = stackedChart.createBufferedImage(500, 500);
+			}
+			else{
+				bufferedImage = stackedChart.createBufferedImage(500, 400);
+			}
+			
 			image = null;
 			try {
 				image = Image.getInstance(writer, bufferedImage, 1.0f);
@@ -721,7 +761,7 @@ public class ReportUtils {
 			barChartsTable.setWidthPercentage(100);
 		//	barChartsTable.setSpacingAfter(20);
 			document.add(barChartsTable);
-			
+}			
 			
 //			document.close();
 		} catch (DocumentException e) {
@@ -737,6 +777,14 @@ public class ReportUtils {
 	
 	public void printReport(){
 		
+		Paragraph endNotes = new Paragraph("1. ROI i.e. Return on Investment is calculated as a percentage of the department's actual cluster usage against their investment", FontFactory.getFont(FontFactory.HELVETICA, 9, Font.NORMAL, Color.BLACK));
+		endNotes.setSpacingBefore(30);
+		try {
+			document.add(endNotes);
+		} catch (DocumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		document.close();
 		
 	}

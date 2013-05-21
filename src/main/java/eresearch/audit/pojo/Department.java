@@ -25,8 +25,11 @@ public class Department {
 	public int getInvestment() {
 		return investment;
 	}
-	public void setInvestment(int investment) {
-		this.investment = investment;
+	public void setInvestment(Integer investment) {
+		if(investment==null)
+			this.investment = 0;
+		else
+			this.investment = investment;
 	}
 	
 }
