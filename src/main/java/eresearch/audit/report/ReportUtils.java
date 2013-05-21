@@ -9,6 +9,8 @@ import java.text.DateFormatSymbols;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +28,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import com.beust.jcommander.Parameter;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
 import com.lowagie.text.Font;
 import com.lowagie.text.FontFactory;
 import com.lowagie.text.Image;
@@ -291,6 +294,20 @@ public class ReportUtils {
 		if(historyStartMonth==0 && historyStartYear==2012){
 			startDateJan2012=true;
 		}
+		
+		
+		
+		Collections.sort(users, new Comparator<UserStatistics>() {
+
+			public int compare(UserStatistics o1, UserStatistics o2) {
+				// TODO Auto-generated method stub
+				
+				return ((Double)(Double.parseDouble(o1.getTotal_core_hours())-Double.parseDouble(o2.getTotal_core_hours()))).intValue();
+				//return 0;
+			}
+		});
+		
+		
 
 		document.addTitle("Report");
 		Paragraph title = new Paragraph("Report", FontFactory.getFont(
@@ -313,17 +330,17 @@ public class ReportUtils {
 		table_cell.setBackgroundColor(Color.GRAY);
 		table.addCell(table_cell);
 
-		table_cell = new PdfPCell(new Phrase("Total Core hours"));
+		table_cell = new PdfPCell(new Phrase("Core hours"));
 		table_cell.setPadding(5);
 		table_cell.setBackgroundColor(Color.GRAY);
 		table.addCell(table_cell);
 
-		table_cell = new PdfPCell(new Phrase("% of group total"));
+		table_cell = new PdfPCell(new Phrase("Group %"));
 		table_cell.setPadding(5);
 		table_cell.setBackgroundColor(Color.GRAY);
 		table.addCell(table_cell);
 
-		table_cell = new PdfPCell(new Phrase("% of cluster total"));
+		table_cell = new PdfPCell(new Phrase("Cluster %"));
 		table_cell.setPadding(5);
 		table_cell.setBackgroundColor(Color.GRAY);
 		table.addCell(table_cell);
@@ -431,6 +448,7 @@ public class ReportUtils {
 
 				table_cell = new PdfPCell(new Phrase(temp.getJobs()));
 				table_cell.setPadding(5);
+				table_cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 				table.addCell(table_cell);
 
 				coreHourDouble = Double.parseDouble(temp.getTotal_core_hours());
@@ -438,6 +456,7 @@ public class ReportUtils {
 				table_cell = new PdfPCell(
 						new Phrase(numform.format(coreHourDouble)));
 				table_cell.setPadding(5);
+				table_cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 				table.addCell(table_cell);
 
 				jobDouble = Double.parseDouble(temp.getJobs());
@@ -447,6 +466,7 @@ public class ReportUtils {
 				table_cell = new PdfPCell(new Phrase(Double.valueOf(decFormat
 						.format((coreHourDouble * 100) / coreHourCount)) + ""));
 				table_cell.setPadding(5);
+				table_cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 				table.addCell(table_cell);
 
 				table_cell = new PdfPCell(new Phrase(
@@ -454,6 +474,7 @@ public class ReportUtils {
 								.format((coreHourDouble * 360000)
 										/ clusterCoreHours)) + ""))); //clusterCoreHours value is in seconds and needs to be divided by 3600
 				table_cell.setPadding(5);
+				table_cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 				table.addCell(table_cell);
 			}
 
@@ -484,7 +505,7 @@ public class ReportUtils {
 							+ " " + historyStartYear + " - "
 							+ dfSym.getMonths()[historyEndMonth] + " "
 							+ historyEndYear, FontFactory.getFont(
-							FontFactory.HELVETICA, 14, Font.BOLD, Color.BLACK));
+							FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
 //				}
 			}
 			else{
@@ -503,7 +524,7 @@ public class ReportUtils {
 //						+ (startdate.getMonth() + 1+":\n"));
 				
 				 p2 = new Paragraph(dfSym.getMonths()[historyStartMonth]
-							+ " " + historyStartYear, FontFactory.getFont(FontFactory.HELVETICA, 14, Font.BOLD, Color.BLACK));
+							+ " " + historyStartYear, FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
 			}
 			
 			
@@ -616,10 +637,10 @@ public class ReportUtils {
 
 //			if((historyStartMonth==0) && (historyStartYear == 2012)){
 			if(startDateJan2012){
-				graphTitle = new Paragraph("Statistics since January 2012", FontFactory.getFont(FontFactory.HELVETICA, 14, Font.BOLD, Color.BLACK));
+				graphTitle = new Paragraph("Statistics since January 2012", FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
 			}
 			else{
-				graphTitle = new Paragraph("Statistics for past 5 months", FontFactory.getFont(FontFactory.HELVETICA, 14, Font.BOLD, Color.BLACK));
+				graphTitle = new Paragraph("Statistics for past 5 months", FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
 			}
 
 			graphTitle.setSpacingBefore(20);
