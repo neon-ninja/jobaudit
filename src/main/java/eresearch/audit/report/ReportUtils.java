@@ -593,12 +593,13 @@ public class ReportUtils {
 			BarRenderer bsr = (BarRenderer) stackedChart.getCategoryPlot()
 					.getRenderer();
 			bsr.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-			bsr.setBaseItemLabelsVisible(true);
-			bsr.setItemLabelsVisible(true);
+		//	bsr.setBaseItemLabelsVisible(true);
+//			bsr.setItemLabelsVisible(true);
 			bsr.setMaximumBarWidth(0.20); // if not used, it displays giant bars
 											// for single month data
-
+			bsr.setShadowVisible(false);
 			stackedChart.getCategoryPlot().setRenderer(bsr);
+			bsr.setItemMargin(10);
 
 			BufferedImage bufferedImage = chart.createBufferedImage(300, 3);
 			Image image = null;
@@ -615,10 +616,10 @@ public class ReportUtils {
 
 //			if((historyStartMonth==0) && (historyStartYear == 2012)){
 			if(startDateJan2012){
-				graphTitle = new Paragraph("Statistics since January 2012", FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
+				graphTitle = new Paragraph("Statistics since January 2012", FontFactory.getFont(FontFactory.HELVETICA, 14, Font.BOLD, Color.BLACK));
 			}
 			else{
-				graphTitle = new Paragraph("Statistics for past 5 months", FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
+				graphTitle = new Paragraph("Statistics for past 5 months", FontFactory.getFont(FontFactory.HELVETICA, 14, Font.BOLD, Color.BLACK));
 			}
 
 			graphTitle.setSpacingBefore(20);
@@ -648,10 +649,13 @@ public class ReportUtils {
 
 			bsr = (BarRenderer) stackedChart.getCategoryPlot().getRenderer();
 			bsr.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-			bsr.setBaseItemLabelsVisible(true);
-			bsr.setItemLabelsVisible(true);
+//			bsr.setBaseItemLabelsVisible(true);
+//			bsr.setItemLabelsVisible(true);
 			bsr.setMaximumBarWidth(0.20); // if not used, it displays giant bars
 											// for single month data
+			bsr.setShadowVisible(false);
+			bsr.setDrawBarOutline(false);
+			bsr.setItemMargin(10);
 
 			stackedChart.getCategoryPlot().setRenderer(bsr);
 
@@ -672,12 +676,14 @@ public class ReportUtils {
 			stackedChart.setBackgroundPaint(Color.WHITE);
 
 			bsr = (BarRenderer) stackedChart.getCategoryPlot().getRenderer();
-			bsr.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-			bsr.setBaseItemLabelsVisible(true);
-			bsr.setItemLabelsVisible(true);
+//			bsr.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+//			bsr.setBaseItemLabelsVisible(true);
+//			bsr.setItemLabelsVisible(true);
 			bsr.setMaximumBarWidth(0.20); // if not used, it displays giant bars
 											// for single month data
-
+			bsr.setShadowVisible(false);
+			bsr.setItemMargin(10);
+			
 			stackedChart.getCategoryPlot().setRenderer(bsr);
 
 			bufferedImage = stackedChart.createBufferedImage(500, 300);
