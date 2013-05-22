@@ -54,14 +54,13 @@ public class ReportUtils {
 	private int historyEndMonth;
 	private List<BarDiagramStatistics> bdslist = new LinkedList<BarDiagramStatistics>();
 	private List<UserStatistics> userstatslist = new LinkedList<UserStatistics>();
-	
+
 	private Document document;
-	
+
 	private PdfWriter writer = null;
 	private Department dept = null;
-	
 
-	// parse from and to dates to get start and end years and months
+	// parse department, from and to dates to get start and end years and months
 
 	@Parameter(names = "-from", description = "start date", required = false)
 	private String fromDate;
@@ -72,101 +71,60 @@ public class ReportUtils {
 	@Parameter(names = "-dept", description = "department", required = true)
 	private String department;
 
-	
-	
-	public void initReport() throws Exception{
-		
-		 document = new Document();
-		
+	//initiates the report generation 
+	public void initReport() throws Exception {
+
+		document = new Document();
+
 		try {
-			 writer = PdfWriter.getInstance(document, new
-			 FileOutputStream("Report"+System.currentTimeMillis()+".pdf"));
-//			writer = PdfWriter.getInstance(document, new FileOutputStream(
-//					"userTest1.pdf"));
+			writer = PdfWriter.getInstance(document, new FileOutputStream(
+					"Report" + System.currentTimeMillis() + ".pdf"));
 		} catch (FileNotFoundException ef) {
 			ef.printStackTrace();
 		} catch (DocumentException e2) {
 			e2.printStackTrace();
 		}
-		
-		
-		
 
+		 //get the info for the specified department, and terminate if it is absent
 		try {
 			dept = userDao.getDepartmentDetails(department);
 		} catch (Exception e1) {
-			//e1.printStackTrace();
 			System.out.println("Department information missing.");
 		}
-		
-		if(dept==null){
+
+		if (dept == null) {
 			System.out.println("Department information missing.");
 			throw new Exception();
 		}
-			
+
 		document.open();
-		
+
 		Paragraph reportTitle;
-		
-//		if((historyStartMonth!=historyEndMonth)&&(historyStartYear!=historyEndYear)){
-		
-//		if(fromDate.equals(toDate)){
-//		if(historyStartMonth==historyEndMonth && historyStartYear==historyEndYear){
-//			reportTitle = new Paragraph("Monthly usage report of Auckland NeSI cluster for "
-//					+ dept.getDepartmentName() + ", for "
-//					+ toDate
-//					+ "\n", FontFactory.getFont(FontFactory.HELVETICA, 18, Font.BOLD, new Color(39, 64, 139)));
-//		}
-//		else{
-//			reportTitle = new Paragraph("Usage report of Auckland NeSI cluster for "
-//					+ department + ", for the period "
-//					+ fromDate+ " to "
-//					+ toDate
-//					+ "\n", FontFactory.getFont(FontFactory.HELVETICA, 18, Font.BOLD, new Color(39, 64, 139)));
-//		}
-//			}
-//			else{
-//				reportTitle = new Paragraph("Monthly usage report of Auckland NeSI cluster for "
-//						+ dept.getDepartmentName() + ", for "
-//						+ (1900 + startdate.getYear()) + "/"
-//						+ (startdate.getMonth() + 1) 
-//						+ "\n", FontFactory.getFont(FontFactory.HELVETICA, 18, Font.BOLD, new Color(39, 64, 139)));
-//			}		
-		
-			reportTitle = new Paragraph("NeSI Pan Cluster Usage Report"
-//				+ dept.getDepartmentName()
-				, FontFactory.getFont(
-//				FontFactory.HELVETICA, 18, Font.BOLD, new Color(39, 64,
-//						139)));
-				FontFactory.HELVETICA, 18, Font.BOLD, Color.BLACK));
-		
-			try {
-				reportTitle.setAlignment(1);
-				
-				document.add(reportTitle);
-				
-				reportTitle = new Paragraph(dept.getDepartmentName(), FontFactory.getFont(
-//						FontFactory.HELVETICA, 16, Font.NORMAL, new Color(39, 64,
-//								139)));
-				FontFactory.HELVETICA, 16, Font.NORMAL, Color.BLACK));
-				
-				reportTitle.setSpacingAfter(30);
-				reportTitle.setAlignment(1);
-				
-				document.add(reportTitle);
-			} catch (DocumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+		reportTitle = new Paragraph("NeSI Pan Cluster Usage Report",
+				FontFactory.getFont(FontFactory.HELVETICA, 18, Font.BOLD,
+						Color.BLACK));
+		try {
+			reportTitle.setAlignment(1);
+			document.add(reportTitle);
+			reportTitle = new Paragraph(dept.getDepartmentName(),
+					FontFactory.getFont(FontFactory.HELVETICA, 16, Font.NORMAL,
+							Color.BLACK));
+			reportTitle.setSpacingAfter(30);
+			reportTitle.setAlignment(1);
+
+			document.add(reportTitle);
+		} catch (DocumentException e) {
+			e.printStackTrace();
+		}
 	}
-	
-	
+
+	//get the report data for the given time-period
 	public void getReportContent(List<String> usrList, int startYear,
-			int startMonth, int endYear, int endMonth, boolean fiveMonthFlag) throws Exception {
+			int startMonth, int endYear, int endMonth, boolean fiveMonthFlag)
+			throws Exception {
 
-//		System.out.println(fromDate);
-//		System.out.println(toDate);
-
+		// time range validation
 		if ((startYear > endYear)
 				|| ((startYear == endYear) && (startMonth > endMonth))) {
 			throw new Exception("from-date is greater that to-date");
@@ -176,25 +134,18 @@ public class ReportUtils {
 		historyEndYear = endYear;
 		historyEndMonth = endMonth;
 
-//		System.out.println(historyStartYear);
-//		System.out.println(historyStartMonth);
-//		System.out.println(historyEndYear);
-//		System.out.println(historyEndMonth);
-
 		List<Future<BarDiagramStatistics>> fbdslist = new LinkedList<Future<BarDiagramStatistics>>();
 
 		Calendar from = Calendar.getInstance();
 		Calendar to = Calendar.getInstance();
 
 		// get list of users
-
 		List<String> userlist = null;
 		if (usrList == null) // if being called from main
 		{
 			from.set(historyStartYear, historyStartMonth, 1, 0, 0, 0);
 			to.set(historyEndYear, historyEndMonth + 1, 1, 0, 0, 0);
 
-//			System.out.println("dept:" + department);
 			String affil;
 			if (department != null) {
 				affil = department;
@@ -202,13 +153,14 @@ public class ReportUtils {
 				affil = "all";
 			}
 			userlist = createUserList(affil, from, to);
-		} else {
+		} else {	//if being called from Statistics/StatisticsAffiliationController
 			userlist = usrList;
 		}
 
 		from.set(historyStartYear, historyStartMonth, 1, 0, 0, 0);
-		to.set(historyEndYear, historyEndMonth+1, 1, 0, 0, 0);
+		to.set(historyEndYear, historyEndMonth + 1, 1, 0, 0, 0);
 
+		//get user statistics (table data)
 		userstatslist = auditRecordDao.getStatisticsForUser(userlist, from, to);
 
 		userlist = new LinkedList<String>();
@@ -218,19 +170,16 @@ public class ReportUtils {
 
 		bdslist = new LinkedList<BarDiagramStatistics>();
 
-		if(fiveMonthFlag){
-			int diff = historyStartMonth-4;
-			if(diff<0){
-				historyStartMonth =diff+11;
-				historyStartYear-=1;
+		if (fiveMonthFlag) {
+			int diff = historyStartMonth - 4;
+			if (diff < 0) {
+				historyStartMonth = diff + 11;
+				historyStartYear -= 1;
+			} else {
+				historyStartMonth = diff;
 			}
-			else{
-				historyStartMonth=diff;
-			}
-			
-//			historyStartMonth=(diff<0?diff+11:diff);
 		}
-		
+
 		// get bar diagram statistics
 		fbdslist = auditRecordDao.getBarDiagramUserStatistics(userlist,
 				historyStartYear, historyStartMonth, historyEndYear,
@@ -240,19 +189,19 @@ public class ReportUtils {
 			bdslist.add(fbds.get());
 		}
 		
-		if(fiveMonthFlag){
-			int diff = historyStartMonth+4;
-			if(diff>11){
-				historyStartMonth =diff-11;
-				historyStartYear+=1;
+		//if bar-chart for past 5 months is to be shown
+		if (fiveMonthFlag) {
+			int diff = historyStartMonth + 4;
+			if (diff > 11) {
+				historyStartMonth = diff - 11;
+				historyStartYear += 1;
+			} else {
+				historyStartMonth = diff;
 			}
-			else{
-				historyStartMonth=diff;
-			}
-//			historyStartMonth=(diff<0?diff+11:diff);
 		}
 	}
 
+	//create userlist for the given period
 	public List<String> createUserList(String affil, Calendar from, Calendar to)
 			throws Exception {
 		List<String> users = new LinkedList<String>();
@@ -278,7 +227,6 @@ public class ReportUtils {
 				throw new Exception("Unexpected affilation string: " + affil);
 			}
 			List<String> usersForAffil = fuserlist.get();
-//			System.out.println("usersforaf:" + usersForAffil.size());
 			for (String u : usersForAffil) {
 				if (usersWithAtLeastOneJob.contains(u)) {
 					users.add(u);
@@ -289,33 +237,29 @@ public class ReportUtils {
 		return users;
 	}
 
+	//populate the report using the given data
 	public void createReport(List<UserStatistics> users,
 			List<BarDiagramStatistics> bdslist) {
 
 		long start = System.currentTimeMillis();
-		
-		DateFormatSymbols dfSym = new DateFormatSymbols();
-		NumberFormat numform=NumberFormat.getIntegerInstance(Locale.US);
 
-		Boolean startDateJan2012=false;
-		
-		if(historyStartMonth==0 && historyStartYear==2012){
-			startDateJan2012=true;
+		DateFormatSymbols dfSym = new DateFormatSymbols();
+		NumberFormat numform = NumberFormat.getIntegerInstance(Locale.US);
+
+		Boolean startDateJan2012 = false;
+
+		//data from Jan2012 is displayed in a different way 
+		if (historyStartMonth == 0 && historyStartYear == 2012) {
+			startDateJan2012 = true;
 		}
-		
-		
-		
+
 		Collections.sort(users, new Comparator<UserStatistics>() {
 
 			public int compare(UserStatistics o1, UserStatistics o2) {
-				// TODO Auto-generated method stub
-				
-				return ((Double)(Double.parseDouble(o1.getTotal_core_hours())-Double.parseDouble(o2.getTotal_core_hours()))).intValue();
-				//return 0;
+				return ((Double) (Double.parseDouble(o1.getTotal_core_hours()) - Double
+						.parseDouble(o2.getTotal_core_hours()))).intValue();
 			}
 		});
-		
-		
 
 		document.addTitle("Report");
 		Paragraph title = new Paragraph("Report", FontFactory.getFont(
@@ -325,11 +269,10 @@ public class ReportUtils {
 
 		PdfPTable table = new PdfPTable(5);
 		table.setHeaderRows(1);
-		float[] columnWidths = new float[]{30f, 10f, 10f, 10f, 10f};
+		float[] columnWidths = new float[] { 30f, 10f, 10f, 10f, 10f };
 		try {
 			table.setWidths(columnWidths);
 		} catch (DocumentException e2) {
-			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
 
@@ -386,23 +329,21 @@ public class ReportUtils {
 
 			int monthCount = historyStartMonth;
 			int yearCount = historyStartYear;
-			
-			if(!startDateJan2012){
-				int diff = historyStartMonth-4;
-				if(diff<0){
-					monthCount =diff+11;
-					yearCount-=1;
-				}
-				else{
-					monthCount=diff;
+
+			if (!startDateJan2012) {
+				int diff = historyStartMonth - 4;
+				if (diff < 0) {
+					monthCount = diff + 11;
+					yearCount -= 1;
+				} else {
+					monthCount = diff;
 				}
 			}
-			
+
 			String monthName = null;
 			for (BarDiagramStatistics bs : bdslist) {
 
-				monthName = dfSym.getMonths()[monthCount]
-						+ " " + yearCount;
+				monthName = dfSym.getMonths()[monthCount] + " " + yearCount;
 				dataSet2.addValue(bs.getParallel_jobs(), "paralleljobcount",
 						monthName);
 				dataSet2.addValue(bs.getSerial_jobs(), "serialjobcount",
@@ -426,8 +367,6 @@ public class ReportUtils {
 			table.setSpacingAfter(10);
 
 			DecimalFormat decFormat = new DecimalFormat("#.#");
-			DecimalFormat dec4Format = new DecimalFormat("#");
-			Double jobDouble;
 			Double coreHourDouble;
 
 			long clusterCoreHours = 0;
@@ -439,14 +378,9 @@ public class ReportUtils {
 
 			Date startdate = from.getTime();
 			Date endDate = to.getTime();
-			
-//			System.out.println("startNend:"+startdate.toString()+","+endDate.toString());
 
 			long starttime = startdate.getTime();
 			long endtime = endDate.getTime();
-
-//			System.out.println("starttime" + starttime);
-//			System.out.println("endtime" + endtime);
 
 			try {
 				clusterCoreHours = Long.parseLong(auditRecordDao
@@ -456,6 +390,7 @@ public class ReportUtils {
 				System.out.println("No data available");
 			}
 
+			//populate table data
 			for (UserStatistics temp : users) {
 				try {
 					table_cell = new PdfPCell(new Phrase(
@@ -473,16 +408,12 @@ public class ReportUtils {
 				table.addCell(table_cell);
 
 				coreHourDouble = Double.parseDouble(temp.getTotal_core_hours());
-				
-				table_cell = new PdfPCell(
-						new Phrase(numform.format(coreHourDouble)));
+
+				table_cell = new PdfPCell(new Phrase(
+						numform.format(coreHourDouble)));
 				table_cell.setPadding(5);
 				table_cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 				table.addCell(table_cell);
-
-				jobDouble = Double.parseDouble(temp.getJobs());
-				
-//				System.out.println("core hours:" + coreHourDouble);
 
 				table_cell = new PdfPCell(new Phrase(Double.valueOf(decFormat
 						.format((coreHourDouble * 100) / coreHourCount)) + ""));
@@ -493,309 +424,230 @@ public class ReportUtils {
 				table_cell = new PdfPCell(new Phrase(
 						(Double.valueOf(decFormat
 								.format((coreHourDouble * 360000)
-										/ clusterCoreHours)) + ""))); //clusterCoreHours value is in seconds and needs to be divided by 3600
+										/ clusterCoreHours)) + ""))); // clusterCoreHours
+																		// value
+																		// is in
+																		// seconds
+																		// and
+																		// needs
+																		// to be
+																		// divided
+																		// by
+																		// 3600
 				table_cell.setPadding(5);
 				table_cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 				table.addCell(table_cell);
 			}
 
 			Paragraph clusterUsage = new Paragraph();
-			Paragraph reportTitle;
-			
-			Paragraph p2=null;
-		
-			if((historyStartMonth!=historyEndMonth)&&(historyStartYear!=historyEndYear)){
-//			reportTitle = new Paragraph("Usage report of Auckland NeSI cluster for "
-//					+ dept.getDepartmentName() + ", for the period "
-//					+ (1900 + startdate.getYear()) + "/"
-//					+ (startdate.getMonth() + 1) + " to "
-//					+ (1900 + endDate.getYear()) + "/" + (endDate.getMonth())
-//					+ "\n", FontFactory.getFont(FontFactory.HELVETICA, 18, Font.BOLD, new Color(39, 64, 139)));
-//			
-//				if (startDateJan2012) {
-////					clusterUsage
-////							.add("\nTotal usage of Auckland NeSI cluster since 2012/01:\n");
-//					p2 = new Paragraph("");
-//				} else {
-//					clusterUsage.add("\nUsage from "
-//							+ (1900 + startdate.getYear()) + "/"
-//							+ (startdate.getMonth() + 1) + " to "
-//							+ (1900 + endDate.getYear()) + "/"
-//							+ (endDate.getMonth() + "\n"));
-					p2 = new Paragraph(dfSym.getMonths()[historyStartMonth]
-							+ " " + historyStartYear + " - "
-							+ dfSym.getMonths()[historyEndMonth] + " "
-							+ historyEndYear, FontFactory.getFont(
-							FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
-//				}
-			}
-			else{
-//				reportTitle = new Paragraph("Monthly usage report of Auckland NeSI cluster for "
-//						+ dept.getDepartmentName() + ", for "
-//						+ (1900 + startdate.getYear()) + "/"
-//						+ (startdate.getMonth() + 1) +": "
-//						+ "\n", FontFactory.getFont(FontFactory.HELVETICA, 18, Font.BOLD, new Color(39, 64, 139)));
-				
-//				reportTitle = new Paragraph("NeSI Pan Cluster Usage Report\n"
-//						+ dept.getDepartmentName(), FontFactory.getFont(
-//						FontFactory.HELVETICA, 18, Font.BOLD, new Color(39, 64,
-//								139)));
-				
-//				clusterUsage.add("\nUsage in "+ (1900 + startdate.getYear()) + "/"
-//						+ (startdate.getMonth() + 1+":\n"));
-				
-				 p2 = new Paragraph(dfSym.getMonths()[historyStartMonth]
-							+ " " + historyStartYear, FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
-			}
-			
-			
-			
-//			if((startdate.getYear()==endDate.getYear()) && (startdate.getMonth()==endDate.getMonth())){
-//				clusterUsage.add("Usage report of Auckland NeSI cluster for "
-//						+ dept.getDepartmentName() + ", for the month "
-//						+ (1900 + startdate.getYear()) + "/"
-//						+ (startdate.getMonth() + 1) 
-//						+ ":\n");
-//			}
-//			else{
-//				clusterUsage.add("Usage report of Auckland NeSI cluster for "
-//						+ dept.getDepartmentName() + ", for the period "
-//						+ (1900 + startdate.getYear()) + "/"
-//						+ (startdate.getMonth() + 1) + " to "
-//						+ (1900 + endDate.getYear()) + "/" + (endDate.getMonth())
-//						+ ":\n");
-//				
-			//	clusterUsage.setFont(arg0)
-//			}
+			Paragraph p2 = null;
 
-			clusterUsage.add(String.format("%s %10s", "\nNumber of Jobs:   ", jobCount));
+			if ((historyStartMonth != historyEndMonth)
+					&& (historyStartYear != historyEndYear)) {
+				p2 = new Paragraph(dfSym.getMonths()[historyStartMonth] + " "
+						+ historyStartYear + " - "
+						+ dfSym.getMonths()[historyEndMonth] + " "
+						+ historyEndYear, FontFactory.getFont(
+						FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
+			} else {
+				p2 = new Paragraph(dfSym.getMonths()[historyStartMonth] + " "
+						+ historyStartYear, FontFactory.getFont(
+						FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
+			}
+
+			clusterUsage.add(String.format("%s %10s", "\nNumber of Jobs:   ",
+					jobCount));
 			clusterUsage.add(String.format("%s %20s", "\nCore Hours:   ",
-//					 Double.valueOf(decFormat.format(coreHourCount))));
-					 numform.format(coreHourCount)));
-		//	document.add(reportTitle);
-			
-			if(!startDateJan2012){	
-				int investment = dept.getInvestment();
-//				Paragraph deptDets = new Paragraph("Department investment for "+historyEndYear+"/"+historyEndMonth, FontFactory.getFont(FontFactory.HELVETICA, 14, Font.UNDERLINE, new Color(0, 0, 255)) );
-				
-				
-//				document.add(p2);
-				
-//				Paragraph deptDets = new Paragraph("\nCPU cores contributed by department: " + investment);
-//
-				if(investment>0){
-				long diffDays = (endtime - starttime) / (24 * 60 * 60 * 1000);
-//
-				long availCoreHours = investment * diffDays * 24;
-//
-//				deptDets.add("\nMax possible number of core hours on department investment: "
-//						+ availCoreHours);
-//				deptDets.add("\nAccumulated monthly core hours: "
-//						+ Double.valueOf(decFormat.format(coreHourCount)));
+					numform.format(coreHourCount)));
 
-				
-				clusterUsage.add(String.format("%s %30s", "\nROI¹:", numform.format(coreHourCount * 100
-								/ availCoreHours)) + "%");
+			//display ROI only for the selected time time period and not for data from Jan2012
+			if (!startDateJan2012) {
+				int investment = dept.getInvestment();
+				//don't display ROI if the department investment is null
+				if (investment > 0) {
+					long diffDays = (endtime - starttime)
+							/ (24 * 60 * 60 * 1000);
+					long availCoreHours = investment * diffDays * 24;
+
+					clusterUsage.add(String
+							.format("%s %30s",
+									"\nROI¹:",
+									numform.format(coreHourCount * 100
+											/ availCoreHours))
+							+ "%");
 				}
-//				document.add(deptDets);
 			}
-			
+
 			p2.setSpacingBefore(30);
-			
+
 			document.add(p2);
 			document.add(clusterUsage);
 
-//			Paragraph p2 = new Paragraph("User Statistics:");
-//			p2.setSpacingBefore(10);
-//			document.add(p2);
-//			table.setSpacingAfter(30);
-
 			table.setWidthPercentage(100);
-
 			table.setHeadersInEvent(true);
-
 			document.add(table);
-		
-//Bar Diagrams		
-if(startDateJan2012){		
-			PdfPTable barChartsTable = new PdfPTable(2);
-			
-			barChartsTable.getDefaultCell().setBorderWidth(0);
-//			System.out.println("barcharttableheight:"+barChartsTable.getDefaultCell().getHeight());
-//			barChartsTable.getDefaultCell().setMinimumHeight(500);
-		
-			
-			JFreeChart chart = ChartFactory.createBarChart("User Statistics",
-					"User", "jobs", dataSet, PlotOrientation.HORIZONTAL, false,
-					true, false);
 
-			// stacked chart for serial and parallel jobs (job count)
-			JFreeChart stackedChart = ChartFactory.createStackedBarChart(
-					"", "Month", "Number of Jobs", dataSet2,
-					PlotOrientation.HORIZONTAL, true, true, false);
+	// Bar Diagrams
+			if (startDateJan2012) {
+				PdfPTable barChartsTable = new PdfPTable(2);
 
-			stackedChart.setBackgroundPaint(Color.WHITE);
+				barChartsTable.getDefaultCell().setBorderWidth(0);
 
-			// get a reference to the plot for further customisation...
-			BarRenderer bsr = (BarRenderer) stackedChart.getCategoryPlot()
-					.getRenderer();
-			bsr.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-		//	bsr.setBaseItemLabelsVisible(true);
-//			bsr.setItemLabelsVisible(true);
-			bsr.setMaximumBarWidth(0.20); // if not used, it displays giant bars
-											// for single month data
-			bsr.setShadowVisible(false);
-			stackedChart.getCategoryPlot().setRenderer(bsr);
-			bsr.setItemMargin(10);
+				JFreeChart chart = ChartFactory.createBarChart(
+						"User Statistics", "User", "jobs", dataSet,
+						PlotOrientation.HORIZONTAL, false, true, false);
 
-			BufferedImage bufferedImage = chart.createBufferedImage(300, 3);
-			Image image = null;
-			try {
-				image = Image.getInstance(writer, bufferedImage, 1.0f);
-			} catch (IOException e) {
-				e.printStackTrace();
+				// stacked chart for serial and parallel jobs (job count)
+				JFreeChart stackedChart = ChartFactory.createStackedBarChart(
+						"", "Month", "Number of Jobs", dataSet2,
+						PlotOrientation.HORIZONTAL, true, true, false);
+
+				stackedChart.setBackgroundPaint(Color.WHITE);
+
+				// get a reference to the plot for further customisation...
+				BarRenderer bsr = (BarRenderer) stackedChart.getCategoryPlot()
+						.getRenderer();
+				bsr.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+				bsr.setMaximumBarWidth(0.20); // if not used, it displays giant
+												// bars
+												// for single month data
+				bsr.setShadowVisible(false);
+				stackedChart.getCategoryPlot().setRenderer(bsr);
+				bsr.setItemMargin(10);
+
+				BufferedImage bufferedImage = chart.createBufferedImage(300, 3);
+				Image image = null;
+				try {
+					image = Image.getInstance(writer, bufferedImage, 1.0f);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				Paragraph graphTitle;
+
+				if (startDateJan2012) {
+					graphTitle = new Paragraph("Statistics since January 2012",
+							FontFactory.getFont(FontFactory.HELVETICA, 16,
+									Font.BOLD, Color.BLACK));
+				} else {
+					graphTitle = new Paragraph("Statistics for past 5 months",
+							FontFactory.getFont(FontFactory.HELVETICA, 16,
+									Font.BOLD, Color.BLACK));
+				}
+
+				graphTitle.setSpacingBefore(20);
+				document.add(graphTitle);
+
+				// stacked chart for serial and parallel jobs (job count)
+				if (startDateJan2012) {
+					bufferedImage = stackedChart.createBufferedImage(500, 500);
+				} else {
+					bufferedImage = stackedChart.createBufferedImage(500, 400);
+				}
+				image = null;
+				try {
+					image = Image.getInstance(writer, bufferedImage, 1.0f);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				barChartsTable.addCell(image);
+
+				// core hours
+				stackedChart = ChartFactory.createStackedBarChart("", "Month",
+						"Number of core hours", dataSet3,
+						PlotOrientation.HORIZONTAL, true, true, false);
+				stackedChart.setBackgroundPaint(Color.WHITE);
+
+				bsr = (BarRenderer) stackedChart.getCategoryPlot()
+						.getRenderer();
+				bsr.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+				bsr.setMaximumBarWidth(0.20); // if not used, it displays giant
+												// bars
+												// for single month data
+				bsr.setShadowVisible(false);
+				bsr.setDrawBarOutline(false);
+				bsr.setItemMargin(10);
+
+				stackedChart.getCategoryPlot().setRenderer(bsr);
+
+				if (startDateJan2012) {
+					bufferedImage = stackedChart.createBufferedImage(500, 500);
+				} else {
+					bufferedImage = stackedChart.createBufferedImage(500, 400);
+				}
+
+				image = null;
+				try {
+					image = Image.getInstance(writer, bufferedImage, 1.0f);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				barChartsTable.addCell(image);
+
+				// chart for average waiting hours
+				stackedChart = ChartFactory.createStackedBarChart("", "Month",
+						"Average waiting time", dataSet4,
+						PlotOrientation.HORIZONTAL, true, true, false);
+				stackedChart.setBackgroundPaint(Color.WHITE);
+
+				bsr = (BarRenderer) stackedChart.getCategoryPlot()
+						.getRenderer();
+				bsr.setMaximumBarWidth(0.20); // if not used, it displays giant
+												// bars
+												// for single month data
+				bsr.setShadowVisible(false);
+				bsr.setItemMargin(10);
+
+				stackedChart.getCategoryPlot().setRenderer(bsr);
+
+				bufferedImage = stackedChart.createBufferedImage(500, 300);
+				image = null;
+				try {
+					image = Image.getInstance(writer, bufferedImage, 1.0f);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				// Disabling "Average Waiting Time" display document.add(image);
+
+				barChartsTable.setSpacingBefore(10);
+				barChartsTable.setWidthPercentage(100);
+				document.add(barChartsTable);
 			}
-			
-//			document.newPage();
-			
-			Paragraph graphTitle;
-			
-
-//			if((historyStartMonth==0) && (historyStartYear == 2012)){
-			if(startDateJan2012){
-				graphTitle = new Paragraph("Statistics since January 2012", FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
-			}
-			else{
-				graphTitle = new Paragraph("Statistics for past 5 months", FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
-			}
-
-			graphTitle.setSpacingBefore(20);
-//			graphTitle.setAlignment(1);
-			
-			document.add(graphTitle);
-
-//			document.add(image);
-//			barChartsTable.addCell(image);
-
-			// stacked chart for serial and parallel jobs (job count)
-			if(startDateJan2012){
-				bufferedImage = stackedChart.createBufferedImage(500, 500);
-			}
-			else{
-				bufferedImage = stackedChart.createBufferedImage(500, 400);
-			}
-			
-			image = null;
-			try {
-				image = Image.getInstance(writer, bufferedImage, 1.0f);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-//			document.add(image);
-			barChartsTable.addCell(image);
-
-			// core hours
-			stackedChart = ChartFactory.createStackedBarChart("", "Month",
-					"Number of core hours", dataSet3,
-					PlotOrientation.HORIZONTAL, true, true, false);
-			stackedChart.setBackgroundPaint(Color.WHITE);
-
-			bsr = (BarRenderer) stackedChart.getCategoryPlot().getRenderer();
-			bsr.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-//			bsr.setBaseItemLabelsVisible(true);
-//			bsr.setItemLabelsVisible(true);
-			bsr.setMaximumBarWidth(0.20); // if not used, it displays giant bars
-											// for single month data
-			bsr.setShadowVisible(false);
-			bsr.setDrawBarOutline(false);
-			bsr.setItemMargin(10);
-
-			stackedChart.getCategoryPlot().setRenderer(bsr);
-
-//			bufferedImage = stackedChart.createBufferedImage(500, 500);
-			
-			if(startDateJan2012){
-				bufferedImage = stackedChart.createBufferedImage(500, 500);
-			}
-			else{
-				bufferedImage = stackedChart.createBufferedImage(500, 400);
-			}
-			
-			image = null;
-			try {
-				image = Image.getInstance(writer, bufferedImage, 1.0f);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-//			document.add(image);
-			barChartsTable.addCell(image);
-
-			// chart for average waiting hours
-			stackedChart = ChartFactory.createStackedBarChart("", "Month",
-					"Average waiting time", dataSet4,
-					PlotOrientation.HORIZONTAL, true, true, false);
-			stackedChart.setBackgroundPaint(Color.WHITE);
-
-			bsr = (BarRenderer) stackedChart.getCategoryPlot().getRenderer();
-//			bsr.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-//			bsr.setBaseItemLabelsVisible(true);
-//			bsr.setItemLabelsVisible(true);
-			bsr.setMaximumBarWidth(0.20); // if not used, it displays giant bars
-											// for single month data
-			bsr.setShadowVisible(false);
-			bsr.setItemMargin(10);
-			
-			stackedChart.getCategoryPlot().setRenderer(bsr);
-
-			bufferedImage = stackedChart.createBufferedImage(500, 300);
-			image = null;
-			try {
-				image = Image.getInstance(writer, bufferedImage, 1.0f);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-//Disabling "Average Waiting Time" display		document.add(image);
-
-			
-			barChartsTable.setSpacingBefore(10);
-			barChartsTable.setWidthPercentage(100);
-		//	barChartsTable.setSpacingAfter(20);
-			document.add(barChartsTable);
-}			
-			
-//			document.close();
 		} catch (DocumentException e) {
 			e.printStackTrace();
 		}
 
 		long end = System.currentTimeMillis();
-		System.out.println("Time taken for Report Generation: "+(end - start)+"ms");
-		
-//		document.newPage();
+		System.out.println("Time taken for Report Generation: " + (end - start)
+				+ "ms");
 	}
-	
-	
-	public void printReport(){
-		
-		Paragraph endNotes = new Paragraph("1. ROI i.e. Return on Investment is calculated as a percentage of the department's actual cluster usage against their investment", FontFactory.getFont(FontFactory.HELVETICA, 9, Font.NORMAL, Color.BLACK));
+
+	//print the report footnotes and close it
+	public void printReport() {
+
+		Paragraph endNotes = new Paragraph(
+				"1. ROI i.e. Return on Investment is calculated as a percentage of the department's actual cluster usage against their investment",
+				FontFactory.getFont(FontFactory.HELVETICA, 9, Font.NORMAL,
+						Color.BLACK));
 		endNotes.setSpacingBefore(30);
 		try {
 			document.add(endNotes);
 		} catch (DocumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		document.close();
-		
+
 	}
 
+	
+//getters-setters	
 	public int getHistoryStartYear() {
 		if (fromDate != null) {
 			historyStartYear = Integer.parseInt(fromDate.substring(0, 4));
 		} else {
 			historyStartYear = Calendar.getInstance().get(Calendar.YEAR);
 		}
-		System.out.println("gethiststartyr");
+		// System.out.println("gethiststartyr");
 		return historyStartYear;
 	}
 
@@ -809,7 +661,7 @@ if(startDateJan2012){
 		} else {
 			historyStartMonth = Calendar.getInstance().get(Calendar.MONTH) + 1;
 		}
-		System.out.println("gethiststrtm");
+		// System.out.println("gethiststrtm");
 		return historyStartMonth;
 	}
 
@@ -823,7 +675,7 @@ if(startDateJan2012){
 		} else {
 			historyEndYear = Calendar.getInstance().get(Calendar.YEAR);
 		}
-		System.out.println("gethistendyr");
+		// System.out.println("gethistendyr");
 		return historyEndYear;
 	}
 
@@ -837,7 +689,7 @@ if(startDateJan2012){
 		} else {
 			historyEndMonth = Calendar.getInstance().get(Calendar.MONTH) + 1;
 		}
-		System.out.println("gethistendm");
+		// System.out.println("gethistendm");
 		return historyEndMonth;
 	}
 
