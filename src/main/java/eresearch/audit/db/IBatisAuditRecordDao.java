@@ -224,10 +224,10 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		Calendar from = Calendar.getInstance();
 		Calendar to= Calendar.getInstance();
 		
-		System.out.println(startYear);
-		System.out.println(startMonth);
-		System.out.println(endYear);
-		System.out.println(endMonth);
+//		System.out.println(startYear);
+//		System.out.println(startMonth);
+//		System.out.println(endYear);
+//		System.out.println(endMonth);
 		
 //		int currMonth = new GregorianCalendar().get(Calendar.MONTH);
 //		int currYear = new GregorianCalendar().get(Calendar.YEAR);
@@ -259,7 +259,7 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 			}
 		    month += 1;
 		    from.set(startYear, month, 1, 0, 0, 0);
-		    System.out.println("month:"+month);
+//		    System.out.println("month:"+month);
 		}
 		if(currMonthInRange) //get the data for the current month
 		{

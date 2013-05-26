@@ -23,6 +23,8 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.category.GradientBarPainter;
+import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.beust.jcommander.Parameter;
@@ -101,7 +103,7 @@ public class ReportUtils {
 
 		Paragraph reportTitle;
 
-		reportTitle = new Paragraph("NeSI Pan Cluster Usage Report",
+		reportTitle = new Paragraph("NeSI Pan Cluster Monthly Usage Report",
 				FontFactory.getFont(FontFactory.HELVETICA, 18, Font.BOLD,
 						Color.BLACK));
 		try {
@@ -117,6 +119,14 @@ public class ReportUtils {
 		} catch (DocumentException e) {
 			e.printStackTrace();
 		}
+		
+		Paragraph intro;
+//		= new Paragraph("Introduction ", FontFactory.getFont(FontFactory.HELVETICA, 16,
+//				Font.BOLD, Color.BLACK));
+//		document.add(intro);
+		
+		intro = new Paragraph("\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. ");
+		document.add(intro);
 	}
 
 	//get the report data for the given time-period
@@ -241,7 +251,7 @@ public class ReportUtils {
 	public void createReport(List<UserStatistics> users,
 			List<BarDiagramStatistics> bdslist) {
 
-		long start = System.currentTimeMillis();
+//		long start = System.currentTimeMillis();
 
 		DateFormatSymbols dfSym = new DateFormatSymbols();
 		NumberFormat numform = NumberFormat.getIntegerInstance(Locale.US);
@@ -256,8 +266,8 @@ public class ReportUtils {
 		Collections.sort(users, new Comparator<UserStatistics>() {
 
 			public int compare(UserStatistics o1, UserStatistics o2) {
-				return ((Double) (Double.parseDouble(o1.getTotal_core_hours()) - Double
-						.parseDouble(o2.getTotal_core_hours()))).intValue();
+				return ((Double) (Double.parseDouble(o2.getTotal_core_hours()) - Double
+						.parseDouble(o1.getTotal_core_hours()))).intValue();
 			}
 		});
 
@@ -277,35 +287,36 @@ public class ReportUtils {
 		}
 
 		PdfPCell table_cell;
+		Font tableFont = new Font(Font.HELVETICA, 10);
 
 		table_cell = new PdfPCell(new Phrase("Researcher"));
 		table_cell.setPadding(5);
 		table_cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-		table_cell.setBackgroundColor(Color.GRAY);
+		table_cell.setBackgroundColor(Color.LIGHT_GRAY);
 		table.addCell(table_cell);
 
 		table_cell = new PdfPCell(new Phrase("Jobs"));
 		table_cell.setPadding(5);
 		table_cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-		table_cell.setBackgroundColor(Color.GRAY);
+		table_cell.setBackgroundColor(Color.LIGHT_GRAY);
 		table.addCell(table_cell);
 
-		table_cell = new PdfPCell(new Phrase("Core hours"));
+		table_cell = new PdfPCell(new Phrase("Core Hours"));
 		table_cell.setPadding(5);
 		table_cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-		table_cell.setBackgroundColor(Color.GRAY);
+		table_cell.setBackgroundColor(Color.LIGHT_GRAY);
 		table.addCell(table_cell);
 
-		table_cell = new PdfPCell(new Phrase("Group %"));
+		table_cell = new PdfPCell(new Phrase("Group % ²"));
 		table_cell.setPadding(5);
 		table_cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-		table_cell.setBackgroundColor(Color.GRAY);
+		table_cell.setBackgroundColor(Color.LIGHT_GRAY);
 		table.addCell(table_cell);
 
-		table_cell = new PdfPCell(new Phrase("Cluster %"));
+		table_cell = new PdfPCell(new Phrase("Cluster % ³"));
 		table_cell.setPadding(5);
 		table_cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-		table_cell.setBackgroundColor(Color.GRAY);
+		table_cell.setBackgroundColor(Color.LIGHT_GRAY);
 		table.addCell(table_cell);
 
 		try {
@@ -344,9 +355,9 @@ public class ReportUtils {
 			for (BarDiagramStatistics bs : bdslist) {
 
 				monthName = dfSym.getMonths()[monthCount] + " " + yearCount;
-				dataSet2.addValue(bs.getParallel_jobs(), "paralleljobcount",
+				dataSet2.addValue(bs.getParallel_jobs(), "Parallel jobs",
 						monthName);
-				dataSet2.addValue(bs.getSerial_jobs(), "serialjobcount",
+				dataSet2.addValue(bs.getSerial_jobs(), "Serial jobs",
 						monthName);
 
 				dataSet3.addValue(bs.getParallel_core_hours(),
@@ -365,6 +376,7 @@ public class ReportUtils {
 			}
 			table.setSpacingBefore(20);
 			table.setSpacingAfter(10);
+			
 
 			DecimalFormat decFormat = new DecimalFormat("#.#");
 			Double coreHourDouble;
@@ -387,44 +399,44 @@ public class ReportUtils {
 						.getTotalCoreHoursInterval((starttime / 1000) + "",
 								(endtime / 1000) + ""));
 			} catch (Exception e1) {
-				System.out.println("No data available");
+				System.out.println("No data available for the period "+startdate+" to "+endDate);
 			}
 
 			//populate table data
 			for (UserStatistics temp : users) {
 				try {
 					table_cell = new PdfPCell(new Phrase(
-							userDao.getUserName(temp.getUser())));
-					table_cell.setPadding(5);
+							userDao.getUserName(temp.getUser()), tableFont));
+					table_cell.setPadding(4);
 					table_cell.setNoWrap(true);
 					table.addCell(table_cell);
 				} catch (Exception e) {
 					table.addCell(temp.getUser());
 				}
 
-				table_cell = new PdfPCell(new Phrase(temp.getJobs()));
-				table_cell.setPadding(5);
+				table_cell = new PdfPCell(new Phrase(numform.format(Long.parseLong(temp.getJobs())), tableFont));
+				table_cell.setPadding(4);
 				table_cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 				table.addCell(table_cell);
 
 				coreHourDouble = Double.parseDouble(temp.getTotal_core_hours());
 
 				table_cell = new PdfPCell(new Phrase(
-						numform.format(coreHourDouble)));
-				table_cell.setPadding(5);
+						numform.format(coreHourDouble), tableFont));
+				table_cell.setPadding(4);
 				table_cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 				table.addCell(table_cell);
 
 				table_cell = new PdfPCell(new Phrase(Double.valueOf(decFormat
-						.format((coreHourDouble * 100) / coreHourCount)) + ""));
-				table_cell.setPadding(5);
+						.format((coreHourDouble * 100) / coreHourCount)) + "", tableFont));
+				table_cell.setPadding(4);
 				table_cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 				table.addCell(table_cell);
 
 				table_cell = new PdfPCell(new Phrase(
 						(Double.valueOf(decFormat
 								.format((coreHourDouble * 360000)
-										/ clusterCoreHours)) + ""))); // clusterCoreHours
+										/ clusterCoreHours)) + ""), tableFont)); // clusterCoreHours
 																		// value
 																		// is in
 																		// seconds
@@ -434,7 +446,7 @@ public class ReportUtils {
 																		// divided
 																		// by
 																		// 3600
-				table_cell.setPadding(5);
+				table_cell.setPadding(4);
 				table_cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 				table.addCell(table_cell);
 			}
@@ -455,8 +467,8 @@ public class ReportUtils {
 						FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
 			}
 
-			clusterUsage.add(String.format("%s %10s", "\nNumber of Jobs:   ",
-					jobCount));
+			clusterUsage.add(String.format("%s %10s", "\nNumber of Jobs:    ",
+					numform.format(jobCount)));
 			clusterUsage.add(String.format("%s %20s", "\nCore Hours:   ",
 					numform.format(coreHourCount)));
 
@@ -503,6 +515,10 @@ public class ReportUtils {
 						PlotOrientation.HORIZONTAL, true, true, false);
 
 				stackedChart.setBackgroundPaint(Color.WHITE);
+				
+//				stackedChart.getXYPlot().getDomainAxis().setTickLabelFont(new java.awt.Font("Helvetica", Font.BOLD, 8));
+				stackedChart.getCategoryPlot().getDomainAxis().setTickLabelFont(new java.awt.Font(java.awt.Font.DIALOG, 1, 14));
+				stackedChart.getCategoryPlot().getRangeAxis().setTickLabelFont(new java.awt.Font(java.awt.Font.DIALOG, 1, 14));
 
 				// get a reference to the plot for further customisation...
 				BarRenderer bsr = (BarRenderer) stackedChart.getCategoryPlot()
@@ -514,6 +530,7 @@ public class ReportUtils {
 				bsr.setShadowVisible(false);
 				stackedChart.getCategoryPlot().setRenderer(bsr);
 				bsr.setItemMargin(10);
+				bsr.setDefaultBarPainter(new StandardBarPainter());
 
 				BufferedImage bufferedImage = chart.createBufferedImage(300, 3);
 				Image image = null;
@@ -522,6 +539,7 @@ public class ReportUtils {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+/*	disabling graph title display			
 				Paragraph graphTitle;
 
 				if (startDateJan2012) {
@@ -536,7 +554,7 @@ public class ReportUtils {
 
 				graphTitle.setSpacingBefore(20);
 				document.add(graphTitle);
-
+*/
 				// stacked chart for serial and parallel jobs (job count)
 				if (startDateJan2012) {
 					bufferedImage = stackedChart.createBufferedImage(500, 500);
@@ -557,6 +575,9 @@ public class ReportUtils {
 						"Number of core hours", dataSet3,
 						PlotOrientation.HORIZONTAL, true, true, false);
 				stackedChart.setBackgroundPaint(Color.WHITE);
+				
+				stackedChart.getCategoryPlot().getDomainAxis().setTickLabelFont(new java.awt.Font(java.awt.Font.DIALOG, 1, 14));
+				stackedChart.getCategoryPlot().getRangeAxis().setTickLabelFont(new java.awt.Font(java.awt.Font.DIALOG, 1, 14));
 
 				bsr = (BarRenderer) stackedChart.getCategoryPlot()
 						.getRenderer();
@@ -568,6 +589,7 @@ public class ReportUtils {
 				bsr.setDrawBarOutline(false);
 				bsr.setItemMargin(10);
 
+				bsr.setDefaultBarPainter(new GradientBarPainter());
 				stackedChart.getCategoryPlot().setRenderer(bsr);
 
 				if (startDateJan2012) {
@@ -609,7 +631,7 @@ public class ReportUtils {
 				}
 				// Disabling "Average Waiting Time" display document.add(image);
 
-				barChartsTable.setSpacingBefore(10);
+				barChartsTable.setSpacingBefore(20);
 				barChartsTable.setWidthPercentage(100);
 				document.add(barChartsTable);
 			}
@@ -617,20 +639,26 @@ public class ReportUtils {
 			e.printStackTrace();
 		}
 
-		long end = System.currentTimeMillis();
-		System.out.println("Time taken for Report Generation: " + (end - start)
-				+ "ms");
+//		long end = System.currentTimeMillis();
+//		System.out.println("Time taken for Report Generation: " + (end - start)
+//				+ "ms");
 	}
 
 	//print the report footnotes and close it
 	public void printReport() {
-
-		Paragraph endNotes = new Paragraph(
-				"1. ROI i.e. Return on Investment is calculated as a percentage of the department's actual cluster usage against their investment",
-				FontFactory.getFont(FontFactory.HELVETICA, 9, Font.NORMAL,
-						Color.BLACK));
+		
+		Paragraph endNotes = new Paragraph("Notes: ", FontFactory.getFont(FontFactory.HELVETICA, 16,
+				Font.BOLD, Color.BLACK));
 		endNotes.setSpacingBefore(30);
 		try {
+		document.add(endNotes);
+		
+		endNotes = new Paragraph(
+				"\n1. ROI i.e. Return on Investment is calculated as a percentage of the department's actual cluster usage against their investment",
+				FontFactory.getFont(FontFactory.HELVETICA, 9, Font.NORMAL,
+						Color.BLACK));
+		endNotes.add("\n2. Group % is the percentage of core hours as against the group total for this period");
+		endNotes.add("\n3. Cluster % is the percentage of core hours as against the cluster total for this period");
 			document.add(endNotes);
 		} catch (DocumentException e) {
 			e.printStackTrace();
@@ -644,7 +672,10 @@ public class ReportUtils {
 	public int getHistoryStartYear() {
 		if (fromDate != null) {
 			historyStartYear = Integer.parseInt(fromDate.substring(0, 4));
-		} else {
+		} else if(toDate != null){
+			historyStartYear = Integer.parseInt(toDate.substring(0, 4));
+		}
+		else{
 			historyStartYear = Calendar.getInstance().get(Calendar.YEAR);
 		}
 		// System.out.println("gethiststartyr");
@@ -658,6 +689,8 @@ public class ReportUtils {
 	public int getHistoryStartMonth() {
 		if (fromDate != null) {
 			historyStartMonth = Integer.parseInt(fromDate.substring(5));
+		} else if(toDate != null){
+			historyStartMonth = Integer.parseInt(toDate.substring(5));
 		} else {
 			historyStartMonth = Calendar.getInstance().get(Calendar.MONTH) + 1;
 		}
@@ -672,6 +705,8 @@ public class ReportUtils {
 	public int getHistoryEndYear() {
 		if (toDate != null) {
 			historyEndYear = Integer.parseInt(toDate.substring(0, 4));
+		}else if(fromDate != null){
+			historyEndYear = Integer.parseInt(fromDate.substring(0, 4));
 		} else {
 			historyEndYear = Calendar.getInstance().get(Calendar.YEAR);
 		}
@@ -686,6 +721,8 @@ public class ReportUtils {
 	public int getHistoryEndMonth() {
 		if (toDate != null) {
 			historyEndMonth = Integer.parseInt(toDate.substring(5));
+		}else if(fromDate != null){
+			historyEndMonth = Integer.parseInt(fromDate.substring(5));
 		} else {
 			historyEndMonth = Calendar.getInstance().get(Calendar.MONTH) + 1;
 		}

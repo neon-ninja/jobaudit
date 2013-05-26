@@ -2,6 +2,8 @@ package eresearch.audit.report;
 
 import java.util.List;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -20,7 +22,8 @@ public class ReportTest {
 	}
 
 	public static void main(String[] args) {
-
+		Logger.getRootLogger().setLevel(Level.OFF);
+		long start = System.currentTimeMillis();
 		ApplicationContext appContext = new ClassPathXmlApplicationContext(
 				new String[] { "audit-servlet.xml", "root-context.xml",
 						"rest-audit-records-servlet.xml" });
@@ -73,6 +76,10 @@ public class ReportTest {
 		
 //print the report		
 		r.printReport();
+
+		long end = System.currentTimeMillis();
+		System.out.println("Time taken for Report Generation: " + (end - start)
+				+ "ms");
 		
 		System.exit(0);
 	}

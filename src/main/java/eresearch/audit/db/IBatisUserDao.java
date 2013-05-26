@@ -59,7 +59,7 @@ public class IBatisUserDao extends SqlMapClientDaoSupport implements UserDao {
 		return this.executorService.submit(
 			new Callable<List<String>>() {
 				public List<String> call() throws Exception {
-					System.out.println("top:"+top+"bottom:"+bottom);
+//					System.out.println("top:"+top+"bottom:"+bottom);
 					Map<String,Object> params=new HashMap<String, Object>();
 					params.put("top", top);
 					params.put("bottom", bottom);
