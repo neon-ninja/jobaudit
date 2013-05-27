@@ -72,6 +72,9 @@ public class ReportUtils {
 
 	@Parameter(names = "-dept", description = "department", required = true)
 	private String department;
+	
+	@Parameter(names = "-month", description = "year/month", required = false)
+	private String month;
 
 	//initiates the report generation 
 	public void initReport() throws Exception {
@@ -662,7 +665,10 @@ public class ReportUtils {
 	
 //getters-setters	
 	public int getHistoryStartYear() {
-		if (fromDate != null) {
+		if(month != null){
+			historyStartYear = Integer.parseInt(month.substring(0, 4));
+		}
+		else if (fromDate != null) {
 			historyStartYear = Integer.parseInt(fromDate.substring(0, 4));
 		} else if(toDate != null){
 			historyStartYear = Integer.parseInt(toDate.substring(0, 4));
@@ -679,7 +685,10 @@ public class ReportUtils {
 	}
 
 	public int getHistoryStartMonth() {
-		if (fromDate != null) {
+		if(month != null){
+			historyStartMonth = Integer.parseInt(month.substring(5));
+		}
+		else if (fromDate != null) {
 			historyStartMonth = Integer.parseInt(fromDate.substring(5));
 		} else if(toDate != null){
 			historyStartMonth = Integer.parseInt(toDate.substring(5));
@@ -695,7 +704,11 @@ public class ReportUtils {
 	}
 
 	public int getHistoryEndYear() {
-		if (toDate != null) {
+		
+		if(month != null){
+			historyEndYear = Integer.parseInt(month.substring(0, 4));
+		}
+		else if (toDate != null) {
 			historyEndYear = Integer.parseInt(toDate.substring(0, 4));
 		}else if(fromDate != null){
 			historyEndYear = Integer.parseInt(fromDate.substring(0, 4));
@@ -711,7 +724,10 @@ public class ReportUtils {
 	}
 
 	public int getHistoryEndMonth() {
-		if (toDate != null) {
+		if(month!=null){
+			historyEndMonth = Integer.parseInt(month.substring(5));
+		}
+		else if (toDate != null) {
 			historyEndMonth = Integer.parseInt(toDate.substring(5));
 		}else if(fromDate != null){
 			historyEndMonth = Integer.parseInt(fromDate.substring(5));
