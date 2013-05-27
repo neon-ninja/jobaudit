@@ -199,7 +199,7 @@ public class ReportUtils {
 		//if bar-chart for past 5 months is to be shown
 		if (fiveMonthFlag) {
 			int diff = historyStartMonth + 4;
-			if (diff > 11) {
+			if (diff >= 11) {
 				historyStartMonth = diff - 11;
 				historyStartYear += 1;
 			} else {
@@ -451,8 +451,8 @@ public class ReportUtils {
 			Paragraph clusterUsage = new Paragraph();
 			Paragraph p2 = null;
 
-			if ((historyStartMonth != historyEndMonth)
-					&& (historyStartYear != historyEndYear)) {
+			if (!((historyStartMonth == historyEndMonth)
+					&& (historyStartYear == historyEndYear))) {
 				p2 = new Paragraph(dfSym.getMonths()[historyStartMonth] + " "
 						+ historyStartYear + " - "
 						+ dfSym.getMonths()[historyEndMonth] + " "
