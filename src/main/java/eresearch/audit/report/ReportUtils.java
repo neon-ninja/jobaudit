@@ -121,9 +121,6 @@ public class ReportUtils {
 		}
 		
 		Paragraph intro;
-//		= new Paragraph("Introduction ", FontFactory.getFont(FontFactory.HELVETICA, 16,
-//				Font.BOLD, Color.BLACK));
-//		document.add(intro);
 		
 		intro = new Paragraph("\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. ");
 		document.add(intro);
@@ -516,7 +513,6 @@ public class ReportUtils {
 
 				stackedChart.setBackgroundPaint(Color.WHITE);
 				
-//				stackedChart.getXYPlot().getDomainAxis().setTickLabelFont(new java.awt.Font("Helvetica", Font.BOLD, 8));
 				stackedChart.getCategoryPlot().getDomainAxis().setTickLabelFont(new java.awt.Font(java.awt.Font.DIALOG, 1, 14));
 				stackedChart.getCategoryPlot().getRangeAxis().setTickLabelFont(new java.awt.Font(java.awt.Font.DIALOG, 1, 14));
 
@@ -638,10 +634,6 @@ public class ReportUtils {
 		} catch (DocumentException e) {
 			e.printStackTrace();
 		}
-
-//		long end = System.currentTimeMillis();
-//		System.out.println("Time taken for Report Generation: " + (end - start)
-//				+ "ms");
 	}
 
 	//print the report footnotes and close it
