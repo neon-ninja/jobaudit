@@ -56,7 +56,11 @@ public class ReportUtils {
 	private int historyEndMonth;
 	private List<BarDiagramStatistics> bdslist = new LinkedList<BarDiagramStatistics>();
 	private List<UserStatistics> userstatslist = new LinkedList<UserStatistics>();
-
+	private String introPara;
+	private String notes;
+//	private String note2;
+//	private String note3;
+	
 	private Document document;
 
 	private PdfWriter writer = null;
@@ -125,7 +129,7 @@ public class ReportUtils {
 		
 		Paragraph intro;
 		
-		intro = new Paragraph("\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. ");
+		intro = new Paragraph("\n"+introPara);
 		document.add(intro);
 	}
 
@@ -649,11 +653,12 @@ public class ReportUtils {
 		document.add(endNotes);
 		
 		endNotes = new Paragraph(
-				"\n1. ROI i.e. Return on Investment is calculated as a percentage of the department's actual cluster usage against their investment",
+//				"\n1. ROI i.e. Return on Investment is calculated as a percentage of the department's actual cluster usage against their investment",
+				"\n"+notes,
 				FontFactory.getFont(FontFactory.HELVETICA, 9, Font.NORMAL,
 						Color.BLACK));
-		endNotes.add("\n2. Group % is the percentage of core hours as against the group total for this period");
-		endNotes.add("\n3. Cluster % is the percentage of core hours as against the cluster total for this period");
+//		endNotes.add("\n2. Group % is the percentage of core hours as against the group total for this period");
+//		endNotes.add("\n3. Cluster % is the percentage of core hours as against the cluster total for this period");
 			document.add(endNotes);
 		} catch (DocumentException e) {
 			e.printStackTrace();
@@ -772,5 +777,21 @@ public class ReportUtils {
 
 	public void setAuditRecordDao(AuditRecordDao auditRecordDao) {
 		this.auditRecordDao = auditRecordDao;
+	}
+
+	public String getIntroPara() {
+		return introPara;
+	}
+
+	public void setIntroPara(String introPara) {
+		this.introPara = introPara;
+	}
+
+	public String getNotes() {
+		return notes;
+	}
+
+	public void setNotes(String notes) {
+		this.notes = notes;
 	}
 }

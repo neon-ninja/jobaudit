@@ -124,7 +124,7 @@ public class StatisticsUserController extends StatisticsController {
 		userstatslist = reportUtils.getUserstatslist();
 		bdslist = reportUtils.getBdslist();
 		
-		System.out.println("list size:"+bdslist.size());
+//		System.out.println("list size:"+bdslist.size());
 		
         mav.addObject("user_statistics", userstatslist);
 		mav.addObject("job_statistics", bdslist);
