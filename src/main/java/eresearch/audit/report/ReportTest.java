@@ -21,6 +21,7 @@ public class ReportTest {
 		// TODO Auto-generated constructor stub
 	}
 
+	
 	public static void main(String[] args) {
 		Logger.getRootLogger().setLevel(Level.OFF);
 		long start = System.currentTimeMillis();
@@ -38,6 +39,9 @@ public class ReportTest {
 			System.exit(0);
 		}
 
+		
+/****** old report (single dept)		
+		
 		try{
 			r.initReport();
 		}catch(Exception e){
@@ -80,7 +84,10 @@ public class ReportTest {
 		long end = System.currentTimeMillis();
 		System.out.println("Time taken for Report Generation: " + (end - start)
 				+ "ms");
+				
+************** old report (single dept)***/		
 		
+		r.generateReportForAllDepartments();
 		System.exit(0);
 	}
 }

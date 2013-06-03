@@ -472,6 +472,18 @@
 		WHERE 
 		done BETWEEN #start# and #end#
 	</select>
+	
+	<select id="getAllDepartments" parameterClass="java.lang.String" resultClass="eresearch.audit.pojo.Department">
+		SELECT 
+		deptname AS departmentName,
+		deptshort AS affiliation,
+		investment AS investment,
+		deptemail AS email
+		FROM 
+		department_info
+		
+	</select>	
+	
 </sqlMap>
 
 

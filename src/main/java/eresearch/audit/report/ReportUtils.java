@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.text.DateFormatSymbols;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,6 +27,7 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.GradientBarPainter;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import com.beust.jcommander.Parameter;
 import com.lowagie.text.Document;
@@ -46,6 +48,26 @@ import eresearch.audit.pojo.BarDiagramStatistics;
 import eresearch.audit.pojo.Department;
 import eresearch.audit.pojo.UserStatistics;
 
+
+//mail
+import java.util.Properties;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+
+
+
 public class ReportUtils {
 
 	private UserDao userDao;
@@ -58,6 +80,18 @@ public class ReportUtils {
 	private List<UserStatistics> userstatslist = new LinkedList<UserStatistics>();
 	private String introPara;
 	private String notes;
+	
+	private String username;
+	private String password;
+	private String host;
+	private String port;
+	
+	private Session session;
+	private Message message;
+	
+	private String reportName;
+	
+	
 //	private String note2;
 //	private String note3;
 	
@@ -65,6 +99,8 @@ public class ReportUtils {
 
 	private PdfWriter writer = null;
 	private Department dept = null;
+	
+	JavaMailSenderImpl jms;
 
 	// parse department, from and to dates to get start and end years and months
 
@@ -74,12 +110,117 @@ public class ReportUtils {
 	@Parameter(names = "-to", description = "end date", required = false)
 	private String toDate;
 
-	@Parameter(names = "-dept", description = "department", required = true)
+	@Parameter(names = "-dept", description = "department", required = false)
 	private String department;
 	
 	@Parameter(names = "-month", description = "year/month", required = false)
 	private String month;
 
+	
+	
+	
+	public void generateReportForAllDepartments(){
+		
+		
+		if(month==null && toDate==null && fromDate ==null){
+			int monthInt = Calendar.getInstance().get(Calendar.MONTH);
+			int yearInt = Calendar.getInstance().get(Calendar.YEAR);
+			if(monthInt==0){
+				monthInt=11;
+				yearInt--;
+			}
+			month=yearInt+"/"+monthInt;
+		}
+		
+		
+		Properties props = new Properties();
+		props.put("mail.smtp.auth", "true");
+		props.put("mail.smtp.starttls.enable", "true");
+		props.put("mail.smtp.host", host);
+		props.put("mail.smtp.port", port);
+		
+		session = Session.getInstance(props,
+				  new javax.mail.Authenticator() {
+					protected PasswordAuthentication getPasswordAuthentication() {
+						return new PasswordAuthentication(username, password);
+					}
+				  });
+		
+
+		
+		List<Department> deptList = new ArrayList<Department>();
+		try{
+			deptList = userDao.getDepartmentList();
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		for(Department d: deptList){
+			
+//report start			
+			
+			dept = d;
+			department = d.getAffiliation();
+			
+			reportName = d.getDepartmentName()+"_"+System.currentTimeMillis();
+			try{
+				initReport();
+			}catch(Exception e){
+				System.out.println("error creating report");
+				System.exit(0);
+			}
+			
+	//populate report content for for current/specified month/time-period (command line arguments)		
+			try {
+				//calculate the report data
+//				getReportContent(null, 2013,
+//						1, 2013,
+//						1, true);
+				
+				getReportContent(null, getHistoryStartYear(),
+						getHistoryStartMonth()-1, getHistoryEndYear(),
+						getHistoryEndMonth()-1, true);				
+				
+				
+				List<BarDiagramStatistics> bds = getBdslist();
+				List<UserStatistics> us = getUserstatslist();
+
+				//populate the report with the above data
+				createReport(us, bds);
+			} catch (Exception e) {
+				System.out.println("invalid parameters");
+			}
+
+	//populate report content for the period - Jan 2012 to present
+			try {
+				//calculate the report data
+				getReportContent(null, 2012,
+						0, getHistoryEndYear(),
+						getHistoryEndMonth()-1, false);
+				List<BarDiagramStatistics> bds = getBdslist();
+				List<UserStatistics> us = getUserstatslist();
+
+				//populate the report with the above data
+				createReport(us, bds);
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+			
+	//print the report		
+			printReport();
+
+			long end = System.currentTimeMillis();
+//			System.out.println("Time taken for Report Generation: " + (end - start)
+//					+ "ms");			
+			
+			
+			
+//report end			
+			
+		}
+	}
+	
 	//initiates the report generation 
 	public void initReport() throws Exception {
 
@@ -87,13 +228,15 @@ public class ReportUtils {
 
 		try {
 			writer = PdfWriter.getInstance(document, new FileOutputStream(
-					"Report" + System.currentTimeMillis() + ".pdf"));
+//					"Report" + System.currentTimeMillis() + ".pdf"));
+					reportName + ".pdf"));
 		} catch (FileNotFoundException ef) {
 			ef.printStackTrace();
 		} catch (DocumentException e2) {
 			e2.printStackTrace();
 		}
 
+/* removed, sice getAllDepartments() query gets all departments with their details		
 		 //get the info for the specified department, and terminate if it is absent
 		try {
 			dept = userDao.getDepartmentDetails(department);
@@ -105,6 +248,8 @@ public class ReportUtils {
 			System.out.println("Department information missing.");
 			throw new Exception();
 		}
+		
+*/		
 
 		document.open();
 
@@ -664,7 +809,115 @@ public class ReportUtils {
 			e.printStackTrace();
 		}
 		document.close();
+		
+		
+//javamail
+		
+		System.out.println("start");
+		
+		try {
+			 
+			 message = new MimeMessage(session);
+			message.setFrom(new InternetAddress("sharryu@gmail.com"));
+			 
+			message.setRecipients(Message.RecipientType.TO,
+				InternetAddress.parse(dept.getEmail()));
+			message.setSubject("Monthly Usage Report");
+//			message.setText("Dear "+dept.getDepartmentName()+","
+//				+ "\n\n Please find attached your monthly usage report");
+			
+			 // Create the message part 
+	         BodyPart messageBodyPart = new MimeBodyPart();
 
+	         // Fill the message
+	         messageBodyPart.setText("Dear "+dept.getDepartmentName()+","
+				+ "\n\n Please find attached your monthly usage report");
+	         
+	         // Create a multipar message
+	         Multipart multipart = new MimeMultipart();
+
+	         // Set text message part
+	         multipart.addBodyPart(messageBodyPart);
+
+	         // Part two is attachment
+	         messageBodyPart = new MimeBodyPart();
+	         String filename = reportName+".pdf";
+	         DataSource source = new FileDataSource(filename);
+	         messageBodyPart.setDataHandler(new DataHandler(source));
+	         messageBodyPart.setFileName(filename);
+	         multipart.addBodyPart(messageBodyPart);
+
+	         // Send the complete message parts
+	         message.setContent(multipart );
+ 
+			Transport.send(message);
+ 
+			System.out.println("Done");
+ 
+		} catch (MessagingException e) {
+			throw new RuntimeException(e);
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+/*			
+//		JavaMailSenderImpl jms = new JavaMailSenderImpl();
+//		sender.setHost("auckland.ac.nz");
+//		jms.setHost("mail.google.com");
+//		jms.setUsername("smun671@aucklanduni.ac.nz");
+//		jms.setPort(465);
+//		
+//		MimeMessage message = jms.createMimeMessage();
+		SimpleMailMessage sm = new SimpleMailMessage();
+		sm.setTo("smun671@aucklanduni.ac.nz");
+		sm.setText("Hello!!!");
+		
+		
+			jms.send(sm);
+	
+		
+		
+		try{
+		// use the true flag to indicate you need a multipart message
+		MimeMessageHelper helper = new MimeMessageHelper(message, true);
+		helper.setTo("smun671@aucklanduni.ac.nz");
+
+		helper.setText("Check out this image!");
+
+		// let's attach the infamous windows Sample file (this time copied to c:/)
+		FileSystemResource file = new FileSystemResource(new File("C:/Users/user1/Documents/GitHub/jobaudit/Department of Computer Science_1369701232952.pdf"));
+		helper.addAttachment("monthlyreport.pdf", file);
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		jms.send(message);
+*/
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 	}
 
 	
@@ -793,5 +1046,45 @@ public class ReportUtils {
 
 	public void setNotes(String notes) {
 		this.notes = notes;
+	}
+
+	public JavaMailSenderImpl getJms() {
+		return jms;
+	}
+
+	public void setJms(JavaMailSenderImpl jms) {
+		this.jms = jms;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getHost() {
+		return host;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public String getPort() {
+		return port;
+	}
+
+	public void setPort(String port) {
+		this.port = port;
 	}
 }
