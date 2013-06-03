@@ -137,14 +137,15 @@ public class ReportUtils {
 		props.put("mail.smtp.auth", "true");
 		props.put("mail.smtp.starttls.enable", "true");
 		props.put("mail.smtp.host", host);
-		props.put("mail.smtp.port", port);
+//		props.put("mail.smtp.port", port);
 		
-		session = Session.getInstance(props,
-				  new javax.mail.Authenticator() {
+		session = Session.getInstance(props
+				,new javax.mail.Authenticator() {
 					protected PasswordAuthentication getPasswordAuthentication() {
 						return new PasswordAuthentication(username, password);
 					}
-				  });
+				  }
+		);
 		
 
 		
@@ -818,7 +819,8 @@ public class ReportUtils {
 		try {
 			 
 			 message = new MimeMessage(session);
-			message.setFrom(new InternetAddress("sharryu@gmail.com"));
+//			message.setFrom(new InternetAddress("sharryu@gmail.com"));
+			message.setFrom(new InternetAddress(username));
 			 
 			message.setRecipients(Message.RecipientType.TO,
 				InternetAddress.parse(dept.getEmail()));
@@ -831,7 +833,7 @@ public class ReportUtils {
 
 	         // Fill the message
 	         messageBodyPart.setText("Dear "+dept.getDepartmentName()+","
-				+ "\n\n Please find attached your monthly usage report");
+				+ "\n\nPlease find attached your monthly usage report");
 	         
 	         // Create a multipar message
 	         Multipart multipart = new MimeMultipart();
