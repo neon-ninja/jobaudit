@@ -819,16 +819,13 @@ public class ReportUtils {
 		try {
 			 
 			 message = new MimeMessage(session);
-//			message.setFrom(new InternetAddress("sharryu@gmail.com"));
 			message.setFrom(new InternetAddress(username));
 			 
 			message.setRecipients(Message.RecipientType.TO,
 				InternetAddress.parse(dept.getEmail()));
 			message.setSubject("Monthly Usage Report");
-//			message.setText("Dear "+dept.getDepartmentName()+","
-//				+ "\n\n Please find attached your monthly usage report");
-			
-			 // Create the message part 
+
+			// Create the message part 
 	         BodyPart messageBodyPart = new MimeBodyPart();
 
 	         // Fill the message
@@ -859,67 +856,6 @@ public class ReportUtils {
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);
 		}
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-/*			
-//		JavaMailSenderImpl jms = new JavaMailSenderImpl();
-//		sender.setHost("auckland.ac.nz");
-//		jms.setHost("mail.google.com");
-//		jms.setUsername("smun671@aucklanduni.ac.nz");
-//		jms.setPort(465);
-//		
-//		MimeMessage message = jms.createMimeMessage();
-		SimpleMailMessage sm = new SimpleMailMessage();
-		sm.setTo("smun671@aucklanduni.ac.nz");
-		sm.setText("Hello!!!");
-		
-		
-			jms.send(sm);
-	
-		
-		
-		try{
-		// use the true flag to indicate you need a multipart message
-		MimeMessageHelper helper = new MimeMessageHelper(message, true);
-		helper.setTo("smun671@aucklanduni.ac.nz");
-
-		helper.setText("Check out this image!");
-
-		// let's attach the infamous windows Sample file (this time copied to c:/)
-		FileSystemResource file = new FileSystemResource(new File("C:/Users/user1/Documents/GitHub/jobaudit/Department of Computer Science_1369701232952.pdf"));
-		helper.addAttachment("monthlyreport.pdf", file);
-
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		jms.send(message);
-*/
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 	}
 
 	

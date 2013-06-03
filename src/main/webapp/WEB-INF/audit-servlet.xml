@@ -80,21 +80,9 @@
 	    <property name="auditRecordDao" ref="auditRecordDao"/>
 	    <property name="introPara" value="${report.intro}"></property>
 	    <property name="notes" value="${report.notes}"></property>
-<!-- 	    <property name="jms" ref="mailSender"/> -->
-  	    <property name="username" value="smun671@aucklanduni.ac.nz"/>
-<!--  <property name="username" value="${mail.username}"/>  -->
+ 		<property name="username" value="${mail.username}"/> 
 	    <property name="password" value="${mail.pwd}"/>
-<!-- <property name="password" value=""/> -->
-<!-- 	    <property name="host" value="smtp.gmail.com"/> -->
-<!-- 	    <property name="port" value="587"/> -->
-		
 		<property name="host" value="mailhost.auckland.ac.nz"/> 
-<!--  	    <property name="port" value="587"/> -->
-<!--  	    <property name="port" value="465"/> -->
-
-
-<!-- 	    <property name="note2" value="${report.note2}"></property> -->
-<!-- 	    <property name="note3" value="${report.note3}"></property> -->
 	</bean>
 
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
@@ -127,22 +115,4 @@
 		<property name="suffix" value=".jsp"/>
 	</bean>
 	
-<!-- 	<bean id="mailSender" class ="org.springframework.mail.javamail.JavaMailSenderImpl" > -->
-<!--     <property name="host" value="smtp.gmail.com" /> -->
-<!-- 	<property name="port" value="465" /> -->
-<!-- 	<property name="protocol" value="smtp" /> -->
-<!--     <property name="username" value="sharryu@gmail.com" /> -->
-<!--     <property name="password" value="${mail.pwd}" /> -->
-<!--     <property name="javaMailProperties"> -->
-<!--     <props> -->
-<!--         <prop key="mail.smtp.user">sharryu@gmail.com</prop> -->
-<!--         <prop key="mail.smtp.password">${mail.pwd}</prop> -->
-<!--         <prop key="mail.smtp.host">smtp.gmail.com</prop> -->
-<!--         <prop key="mail.smtp.port">465</prop> -->
-<!--         <prop key="mail.smtp.auth">true</prop> -->
-<!--         <prop key="mail.smtp.starttls.enable">true</prop> -->
-<!--     </props> -->
-<!--     </property> -->
-<!-- </bean> -->
-
 </beans>
