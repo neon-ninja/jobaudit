@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -23,7 +24,8 @@ public class ReportTest {
 
 	
 	public static void main(String[] args) {
-		Logger.getRootLogger().setLevel(Level.OFF);
+		
+		Logger.getRootLogger().setLevel(Level.INFO);
 		long start = System.currentTimeMillis();
 		ApplicationContext appContext = new ClassPathXmlApplicationContext(
 				new String[] { "audit-servlet.xml", "root-context.xml",

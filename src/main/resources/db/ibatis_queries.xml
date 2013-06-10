@@ -478,7 +478,9 @@
 		deptname AS departmentName,
 		deptshort AS affiliation,
 		investment AS investment,
-		deptemail AS email
+		deptemail AS email,
+		depthead AS depthead
+		
 		FROM 
 		department_info
 		

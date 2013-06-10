@@ -19,6 +19,8 @@ import java.util.Locale;
 import java.util.concurrent.Future;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
@@ -27,7 +29,10 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.GradientBarPainter;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 
 import com.beust.jcommander.Parameter;
 import com.lowagie.text.Document;
@@ -70,6 +75,9 @@ import javax.mail.internet.MimeMultipart;
 
 public class ReportUtils {
 
+//	static Logger log = Logger.getLogger(Thread.currentThread().getClass());
+	static Logger log = Logger.getLogger(ReportUtils.class);
+	
 	private UserDao userDao;
 	private AuditRecordDao auditRecordDao;
 	private int historyStartYear;
@@ -81,15 +89,17 @@ public class ReportUtils {
 	private String introPara;
 	private String notes;
 	
-	private String username;
-	private String password;
-	private String host;
-	private String port;
+	private String mailFrom;
+	private String mailCc;
 	
-	private Session session;
-	private Message message;
+//	private Session session;
+	private MimeMessage message;
 	
 	private String reportName;
+	
+	private JavaMailSenderImpl mailSendr;
+	private MimeMessageHelper helper; 
+//	private SimpleMailMessage sm;
 	
 	
 //	private String note2;
@@ -133,19 +143,19 @@ public class ReportUtils {
 		}
 		
 		
-		Properties props = new Properties();
-		props.put("mail.smtp.auth", "true");
-		props.put("mail.smtp.starttls.enable", "true");
-		props.put("mail.smtp.host", host);
+//		Properties props = new Properties();
+//		props.put("mail.smtp.auth", "true");
+//		props.put("mail.smtp.starttls.enable", "true");
+//		props.put("mail.smtp.host", host);
 //		props.put("mail.smtp.port", port);
 		
-		session = Session.getInstance(props
-				,new javax.mail.Authenticator() {
-					protected PasswordAuthentication getPasswordAuthentication() {
-						return new PasswordAuthentication(username, password);
-					}
-				  }
-		);
+//		session = Session.getInstance(props
+//				,new javax.mail.Authenticator() {
+//					protected PasswordAuthentication getPasswordAuthentication() {
+//						return new PasswordAuthentication(username, password);
+//					}
+//				  }
+//		);
 		
 
 		
@@ -155,6 +165,7 @@ public class ReportUtils {
 		}
 		catch(Exception e){
 			e.printStackTrace();
+			log.error(e.toString());
 		}
 		
 		for(Department d: deptList){
@@ -168,6 +179,7 @@ public class ReportUtils {
 			try{
 				initReport();
 			}catch(Exception e){
+				log.error(e.toString());
 				System.out.println("error creating report");
 				System.exit(0);
 			}
@@ -190,6 +202,7 @@ public class ReportUtils {
 				//populate the report with the above data
 				createReport(us, bds);
 			} catch (Exception e) {
+				log.error(e.toString());
 				System.out.println("invalid parameters");
 			}
 
@@ -205,6 +218,7 @@ public class ReportUtils {
 				//populate the report with the above data
 				createReport(us, bds);
 			} catch (Exception e) {
+				log.error(e.toString());
 				System.out.println(e.getMessage());
 			}
 			
@@ -225,6 +239,8 @@ public class ReportUtils {
 	//initiates the report generation 
 	public void initReport() throws Exception {
 
+		log.info("Generating Report for "+dept.getDepartmentName());
+		
 		document = new Document();
 
 		try {
@@ -233,8 +249,10 @@ public class ReportUtils {
 					reportName + ".pdf"));
 		} catch (FileNotFoundException ef) {
 			ef.printStackTrace();
+			log.error(ef.toString());
 		} catch (DocumentException e2) {
 			e2.printStackTrace();
+			log.error(e2.toString());
 		}
 
 /* removed, sice getAllDepartments() query gets all departments with their details		
@@ -271,6 +289,7 @@ public class ReportUtils {
 			document.add(reportTitle);
 		} catch (DocumentException e) {
 			e.printStackTrace();
+			log.error(e.toString());
 		}
 		
 		Paragraph intro;
@@ -434,6 +453,7 @@ public class ReportUtils {
 			table.setWidths(columnWidths);
 		} catch (DocumentException e2) {
 			e2.printStackTrace();
+			log.error(e2.toString());
 		}
 
 		PdfPCell table_cell;
@@ -549,6 +569,7 @@ public class ReportUtils {
 						.getTotalCoreHoursInterval((starttime / 1000) + "",
 								(endtime / 1000) + ""));
 			} catch (Exception e1) {
+				log.error(e1.toString());
 				System.out.println("No data available for the period "+startdate+" to "+endDate);
 			}
 
@@ -601,8 +622,15 @@ public class ReportUtils {
 				table.addCell(table_cell);
 			}
 
-			Paragraph clusterUsage = new Paragraph();
+//			Paragraph clusterUsage = new Paragraph();
 			Paragraph p2 = null;
+			PdfPTable clusterUsage = new PdfPTable(2);
+			clusterUsage.getDefaultCell().setBorder(0);
+			clusterUsage.getDefaultCell().setBorderColor(Color.WHITE);
+			clusterUsage.getDefaultCell().setHorizontalAlignment(0);
+			clusterUsage.getDefaultCell().setPadding(5);
+			clusterUsage.setSpacingBefore(10);
+			clusterUsage.setWidthPercentage(100);
 
 			if (!((historyStartMonth == historyEndMonth)
 					&& (historyStartYear == historyEndYear))) {
@@ -616,11 +644,19 @@ public class ReportUtils {
 						+ historyStartYear, FontFactory.getFont(
 						FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
 			}
+			
+			
 
-			clusterUsage.add(String.format("%s %10s", "\nNumber of Jobs:    ",
-					numform.format(jobCount)));
-			clusterUsage.add(String.format("%s %20s", "\nCore Hours:   ",
-					numform.format(coreHourCount)));
+//			clusterUsage.add(String.format("%-30s %s", "\nNumber of Jobs: ",
+//					numform.format(jobCount)));
+//			clusterUsage.add(String.format("%-30s %s", "\nCore Hours:     ",
+//					numform.format(coreHourCount)));
+			
+			clusterUsage.addCell("Number of Jobs:");
+			clusterUsage.addCell(numform.format(jobCount));
+			
+			clusterUsage.addCell("Core Hours:");
+			clusterUsage.addCell(numform.format(coreHourCount));
 
 			//display ROI only for the selected time time period and not for data from Jan2012
 			if (!startDateJan2012) {
@@ -631,12 +667,16 @@ public class ReportUtils {
 							/ (24 * 60 * 60 * 1000);
 					long availCoreHours = investment * diffDays * 24;
 
-					clusterUsage.add(String
-							.format("%s %30s",
-									"\nROI¹:",
-									numform.format(coreHourCount * 100
-											/ availCoreHours))
-							+ "%");
+//					clusterUsage.add(String
+//							.format("%-30s %-20s",
+//									"\nROI¹:",
+//									numform.format(coreHourCount * 100
+//											/ availCoreHours))
+//							+ "%");
+					
+					clusterUsage.addCell("ROI¹:");
+					clusterUsage.addCell(numform.format(coreHourCount * 100
+							/ availCoreHours));
 				}
 			}
 
@@ -687,6 +727,7 @@ public class ReportUtils {
 					image = Image.getInstance(writer, bufferedImage, 1.0f);
 				} catch (IOException e) {
 					e.printStackTrace();
+					log.error(e.toString());
 				}
 /*	disabling graph title display			
 				Paragraph graphTitle;
@@ -715,6 +756,7 @@ public class ReportUtils {
 					image = Image.getInstance(writer, bufferedImage, 1.0f);
 				} catch (IOException e) {
 					e.printStackTrace();
+					log.error(e.toString());
 				}
 
 				barChartsTable.addCell(image);
@@ -752,6 +794,7 @@ public class ReportUtils {
 					image = Image.getInstance(writer, bufferedImage, 1.0f);
 				} catch (IOException e) {
 					e.printStackTrace();
+					log.error(e.toString());
 				}
 				barChartsTable.addCell(image);
 
@@ -777,6 +820,7 @@ public class ReportUtils {
 					image = Image.getInstance(writer, bufferedImage, 1.0f);
 				} catch (IOException e) {
 					e.printStackTrace();
+					log.error(e.getMessage());
 				}
 				// Disabling "Average Waiting Time" display document.add(image);
 
@@ -786,7 +830,9 @@ public class ReportUtils {
 			}
 		} catch (DocumentException e) {
 			e.printStackTrace();
+			log.error(e.getMessage());
 		}
+		
 	}
 
 	//print the report footnotes and close it
@@ -808,11 +854,50 @@ public class ReportUtils {
 			document.add(endNotes);
 		} catch (DocumentException e) {
 			e.printStackTrace();
+			log.error(e.toString());
 		}
 		document.close();
 		
+		log.info("Report Generated for "+dept.getDepartmentName());		
+		
+//		sm.setTo(dept.getEmail());
+//		sm.setSubject("Monthly Usage Report");
+//		sm.setText("hello");
+//		mailSendr.send(sm);
+		
+		
+		try {
+			message = mailSendr.createMimeMessage();
+
+			// use the true flag to indicate you need a multipart message
+			helper = new MimeMessageHelper(message, true);
+			helper.setTo(dept.getEmail());
+			helper.setFrom(mailFrom);
+			helper.setCc(mailCc);
+
+			helper.setSubject("Monthly Usage Report");
+			
+			String deptHeadName=dept.getDepthead();
+			helper.setText("Dear "+((deptHeadName==null?"Head of Department":deptHeadName.substring(0,deptHeadName.indexOf(" "))))+","
+					+ "\n\nPlease find attached the monthly usage report for "+dept.getDepartmentName());
+
+			FileSystemResource file = new FileSystemResource(new java.io.File(
+					reportName + ".pdf"));
+			helper.addAttachment(reportName + ".pdf", file);
+
+			log.info("sending email to: " + dept.getEmail());
+			mailSendr.send(message);
+			System.out.println("email sent to: " + dept.getEmail());
+			log.info("email sent to: " + dept.getEmail());
+			
+		} catch (Exception e) {
+			System.out.println("error occurred while sending email to: " + dept.getEmail());
+			log.error(e.toString());
+		}
+		
 		
 //javamail
+/*		
 		
 		System.out.println("start");
 		
@@ -856,6 +941,9 @@ public class ReportUtils {
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);
 		}
+*/
+//javamailend		
+		
 	}
 
 	
@@ -994,35 +1082,28 @@ public class ReportUtils {
 		this.jms = jms;
 	}
 
-	public String getUsername() {
-		return username;
+	public String getMailFrom() {
+		return mailFrom;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
+	public void setMailFrom(String mailFrom) {
+		this.mailFrom = mailFrom;
 	}
 
-	public String getPassword() {
-		return password;
+	public String getMailCc() {
+		return mailCc;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	public void setMailCc(String mailCc) {
+		this.mailCc = mailCc;
 	}
 
-	public String getHost() {
-		return host;
+	public JavaMailSenderImpl getMailSender() {
+		return mailSendr;
 	}
 
-	public void setHost(String host) {
-		this.host = host;
+	public void setMailSender(JavaMailSenderImpl mailSender) {
+		this.mailSendr = mailSender;
 	}
 
-	public String getPort() {
-		return port;
-	}
-
-	public void setPort(String port) {
-		this.port = port;
-	}
 }

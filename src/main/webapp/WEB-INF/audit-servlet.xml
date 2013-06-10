@@ -80,9 +80,9 @@
 	    <property name="auditRecordDao" ref="auditRecordDao"/>
 	    <property name="introPara" value="${report.intro}"></property>
 	    <property name="notes" value="${report.notes}"></property>
- 		<property name="username" value="${mail.username}"/> 
-	    <property name="password" value="${mail.pwd}"/>
-		<property name="host" value="mailhost.auckland.ac.nz"/> 
+ 		<property name="mailFrom" value="${mail.from}"/> 
+	    <property name="mailCc" value="${mail.cc}"/>
+		<property name="mailSender" ref="mailSender"/>
 	</bean>
 
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
@@ -114,5 +114,10 @@
 		<property name="prefix" value="/WEB-INF/jsp/"/>
 		<property name="suffix" value=".jsp"/>
 	</bean>
+	
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+      <property name="host" value="${mail.host}"/>
+    </bean>
+    
 	
 </beans>

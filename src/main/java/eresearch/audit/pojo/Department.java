@@ -10,6 +10,7 @@ public class Department {
 	private String affiliation;	//deptshort
 	private int investment;
 	private String email;
+	private String depthead;
 	
 	public String getDepartmentName() {
 		return departmentName;
@@ -37,6 +38,12 @@ public class Department {
 	}
 	public void setEmail(String email) {
 		this.email = email;
+	}
+	public String getDepthead() {
+		return depthead;
+	}
+	public void setDepthead(String depthead) {
+		this.depthead = depthead;
 	}
 	
 }
