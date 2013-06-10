@@ -31,9 +31,7 @@
 					<target>1.5</target>
 				</configuration>
 			</plugin>
-						<!-- you can disable the assembly plugin if you want, your builds will 
-				be faster I find it quite handy to have maven build an executable jar, though -->
-<!-- 			<plugin>
+			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
@@ -60,7 +58,6 @@
 					</execution>
 				</executions>
 			</plugin>
- -->			
 		</plugins>
 	</build>
 	<dependencies>
@@ -220,6 +217,20 @@
 			<version>1.30</version>
 			<type>jar</type>
 			<scope>compile</scope>
+		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.sun.mail</groupId> -->
+<!-- 			<artifactId>mailapi</artifactId> -->
+<!-- 			<version>1.5.0</version> -->
+<!-- 			<type>jar</type> -->
+<!-- 			<scope>compile</scope> -->
+<!-- 		</dependency> -->
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4.3</version>
+<!-- 			<type>jar</type> -->
+<!-- 			<scope>compile</scope> -->
 		</dependency>
 	</dependencies>
 	<pluginRepositories>
