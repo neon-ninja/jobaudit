@@ -19,6 +19,7 @@
 	<bean id="statisticsController" class="eresearch.audit.controller.StatisticsController">
 	    <property name="userDao" ref="userDao"/>
 	    <property name="auditRecordDao" ref="auditRecordDao"/>
+	    <property name="reportUtils" ref="reportUtils"/>
 	    <property name="historyStartYear" value="${history.start.year}"/>
 	    <property name="historyStartMonth" value="${history.start.month}"/>
 	    <property name="historyEndYear" value="${history.end.year}"/>
@@ -30,6 +31,7 @@
 	<bean id="statisticsUserController" class="eresearch.audit.controller.StatisticsUserController">
 	    <property name="userDao" ref="userDao"/>
 	    <property name="auditRecordDao" ref="auditRecordDao"/>
+	    <property name="reportUtils" ref="reportUtils"/>	    
 	    <property name="historyStartYear" value="${history.start.year}"/>
 	    <property name="historyStartMonth" value="${history.start.month}"/>
 	    <property name="historyEndYear" value="${history.end.year}"/>
@@ -38,11 +40,13 @@
 	    <property name="selectedProject" value=""/>
 	    <property name="selectedAffiliation" value=""/>	    
 	    <property name="startYear" value="${history.start.year}"/>
-	    <property name="endYear" value="${history.end.year}"/>
+	    <property name="endYear" value="${history.end.year}"/>	    
 	</bean>
+	
 	<bean id="statisticsAffiliationController" class="eresearch.audit.controller.StatisticsAffiliationController">
 	    <property name="userDao" ref="userDao"/>
 	    <property name="auditRecordDao" ref="auditRecordDao"/>
+	    <property name="reportUtils" ref="reportUtils"/>
 	    <property name="historyStartYear" value="${history.start.year}"/>
 	    <property name="historyStartMonth" value="${history.start.month}"/>
 	    <property name="historyEndYear" value="${history.end.year}"/>
@@ -71,7 +75,15 @@
 	    <property name="auditRecordDao" ref="auditRecordDao"/>
         <property name="maxJobRecordsPerPage" value="${display.max.jobrecords.per.page}"/>
 	</bean>
-
+	<bean id="reportUtils" class="eresearch.audit.report.ReportUtils">
+	    <property name="userDao" ref="userDao"/>
+	    <property name="auditRecordDao" ref="auditRecordDao"/>
+	    <property name="introPara" value="${report.intro}"></property>
+	    <property name="notes" value="${report.notes}"></property>
+ 		<property name="mailFrom" value="${mail.from}"/> 
+	    <property name="mailCc" value="${mail.cc}"/>
+		<property name="mailSender" ref="mailSender"/>
+	</bean>
 
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="urlMap">
@@ -102,5 +114,10 @@
 		<property name="prefix" value="/WEB-INF/jsp/"/>
 		<property name="suffix" value=".jsp"/>
 	</bean>
-
+	
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+      <property name="host" value="${mail.host}"/>
+    </bean>
+    
+	
 </beans>

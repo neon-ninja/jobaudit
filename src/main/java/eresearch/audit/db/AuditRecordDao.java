@@ -26,5 +26,5 @@ public interface AuditRecordDao {
 	public Future<BarDiagramStatistics> getBarDiagramStatisticsForProjectSet(List<String> projects, String bottom, String top) throws Exception;
 	public List<Future<BarDiagramStatistics>> getProjectStats(List<String> projects, Integer startYear, Integer startMonth,Integer endYear, Integer endMonth) throws Exception;
 	public List<Future<BarDiagramStatistics>> getBarDiagramUserStatistics(List<String> userlist, Integer startYear, Integer startMonth,Integer endYear, Integer endMonth) throws Exception;
-
+	public String getTotalCoreHoursInterval(String start, String end) throws Exception;
 }

@@ -15,7 +15,9 @@ import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
 import eresearch.audit.pojo.Affiliation;
+import eresearch.audit.pojo.Department;
 import eresearch.audit.pojo.User;
+import eresearch.audit.pojo.UserStatistics;
 import eresearch.audit.util.UserComparator;
 
 public class IBatisUserDao extends SqlMapClientDaoSupport implements UserDao {
@@ -58,6 +60,7 @@ public class IBatisUserDao extends SqlMapClientDaoSupport implements UserDao {
 		return this.executorService.submit(
 			new Callable<List<String>>() {
 				public List<String> call() throws Exception {
+//					System.out.println("top:"+top+"bottom:"+bottom);
 					Map<String,Object> params=new HashMap<String, Object>();
 					params.put("top", top);
 					params.put("bottom", bottom);
@@ -150,6 +153,44 @@ public class IBatisUserDao extends SqlMapClientDaoSupport implements UserDao {
 			}
 		);
 	}
+	
+	
+//For Report generation queries	
+	
+	public Department getDepartmentDetails(String affil) throws Exception {
+//		return this.executorService.submit(
+//			new Callable<User>() {
+//				public User call() throws Exception {
+//					return (User) getSqlMapClientTemplate().queryForObject("getDepartmentInfo", affil);
+//				}
+//			}
+//		);
+		return (Department) getSqlMapClientTemplate().queryForObject("getDepartmentInfo", affil);
+	}
+	
+	public List<Department> getDepartmentList() throws Exception {	
+		//rf		return this.executorService.submit(
+		//rf			new Callable<List<UserStatistics>>() {
+		//rf				public List<UserStatistics> call() throws Exception {
+							List<Department> list = null;
+//							if (users == null || users.size() == 0) {
+//								list = new LinkedList<UserStatistics>();
+//							} else {
+//								Map<String,Object> params = new HashMap<String,Object>();
+//								params.put("bottom", bottom);
+//								params.put("top", top);
+//								params.put("users", users);
+								list = (List<Department>) getSqlMapClientTemplate().queryForList("getAllDepartments");
+//							}
+							return list;
+		//rf				}
+		//rf			}
+		//rf		);
+			}
+
+	public String getUserName(String upi) throws Exception {
+		return (String) getSqlMapClientTemplate().queryForObject("getUserName", upi);
+	}	
 
 	public void setExecutorService(ExecutorService executorService) {
 		this.executorService = executorService;

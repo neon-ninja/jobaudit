@@ -3,6 +3,7 @@ package eresearch.audit.db;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import eresearch.audit.pojo.Department;
 import eresearch.audit.pojo.User;
 
 public interface UserDao {
@@ -16,5 +17,7 @@ public interface UserDao {
 	public Future<List<String>> getUsersForAffiliation(String code, String dept1) throws Exception;
 	public Future<List<String>> getUsersForAffiliation(String code, String dept1, String dept2) throws Exception;
 	public Future<List<String>> getAffiliations() throws Exception;
-
+	public Department getDepartmentDetails(String affil) throws Exception;
+	public List<Department> getDepartmentList() throws Exception;
+	public String getUserName(String upi) throws Exception;
 }

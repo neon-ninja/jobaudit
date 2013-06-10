@@ -15,6 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 import eresearch.audit.db.AuditRecordDao;
 import eresearch.audit.db.UserDao;
 import eresearch.audit.pojo.User;
+import eresearch.audit.report.ReportUtils;
 
 /**
  *  Base class for the specialized statistics controllers
@@ -23,6 +24,7 @@ public class StatisticsController extends AbstractController {
 
 	protected UserDao userDao;
 	protected AuditRecordDao auditRecordDao;
+	protected ReportUtils reportUtils;
 	protected Integer historyStartYear;
 	protected Integer historyStartMonth;
 	protected Integer historyEndYear;
@@ -139,6 +141,10 @@ public class StatisticsController extends AbstractController {
 
 	public void setEndYear(Integer endYear) {
 		this.endYear = endYear;
-	}	
+	}
+
+	public void setReportUtils(ReportUtils reportUtils) {
+		this.reportUtils = reportUtils;
+	}
 	
 }
