@@ -569,7 +569,7 @@ public class ReportUtils {
 						.getTotalCoreHoursInterval((starttime / 1000) + "",
 								(endtime / 1000) + ""));
 			} catch (Exception e1) {
-				log.error(e1.toString());
+				log.error(e1.toString()+". "+"No data available for the period "+startdate+" to "+endDate);
 				System.out.println("No data available for the period "+startdate+" to "+endDate);
 			}
 
