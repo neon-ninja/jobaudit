@@ -168,6 +168,10 @@ public class ReportUtils {
 			log.error(e.toString());
 		}
 		
+		DateFormatSymbols dsym = new DateFormatSymbols();
+		
+		String rNameFrag = " "+dsym.getMonths()[Integer.parseInt(month.substring(5))]+" "+month.substring(0, 4);
+		
 		for(Department d: deptList){
 			
 //report start			
@@ -175,7 +179,8 @@ public class ReportUtils {
 			dept = d;
 			department = d.getAffiliation();
 			
-			reportName = d.getDepartmentName()+"_"+System.currentTimeMillis();
+			reportName = d.getDepartmentName()+rNameFrag;
+			
 			try{
 				initReport();
 			}catch(Exception e){
