@@ -551,7 +551,6 @@ public class ReportUtils {
 			}
 			table.setSpacingBefore(20);
 			table.setSpacingAfter(10);
-			
 
 			DecimalFormat decFormat = new DecimalFormat("#.#");
 			Double coreHourDouble;
@@ -649,14 +648,7 @@ public class ReportUtils {
 						+ historyStartYear, FontFactory.getFont(
 						FontFactory.HELVETICA, 16, Font.BOLD, Color.BLACK));
 			}
-			
-			
-
-//			clusterUsage.add(String.format("%-30s %s", "\nNumber of Jobs: ",
-//					numform.format(jobCount)));
-//			clusterUsage.add(String.format("%-30s %s", "\nCore Hours:     ",
-//					numform.format(coreHourCount)));
-			
+					
 			clusterUsage.addCell("Number of Jobs:");
 			clusterUsage.addCell(numform.format(jobCount));
 			
@@ -671,14 +663,7 @@ public class ReportUtils {
 					long diffDays = (endtime - starttime)
 							/ (24 * 60 * 60 * 1000);
 					long availCoreHours = investment * diffDays * 24;
-
-//					clusterUsage.add(String
-//							.format("%-30s %-20s",
-//									"\nROI¹:",
-//									numform.format(coreHourCount * 100
-//											/ availCoreHours))
-//							+ "%");
-					
+				
 					clusterUsage.addCell("ROI¹:");
 					clusterUsage.addCell(numform.format(coreHourCount * 100
 							/ availCoreHours));
@@ -734,22 +719,7 @@ public class ReportUtils {
 					e.printStackTrace();
 					log.error(e.toString());
 				}
-/*	disabling graph title display			
-				Paragraph graphTitle;
 
-				if (startDateJan2012) {
-					graphTitle = new Paragraph("Statistics since January 2012",
-							FontFactory.getFont(FontFactory.HELVETICA, 16,
-									Font.BOLD, Color.BLACK));
-				} else {
-					graphTitle = new Paragraph("Statistics for past 5 months",
-							FontFactory.getFont(FontFactory.HELVETICA, 16,
-									Font.BOLD, Color.BLACK));
-				}
-
-				graphTitle.setSpacingBefore(20);
-				document.add(graphTitle);
-*/
 				// stacked chart for serial and parallel jobs (job count)
 				if (startDateJan2012) {
 					bufferedImage = stackedChart.createBufferedImage(500, 500);
@@ -850,12 +820,9 @@ public class ReportUtils {
 		document.add(endNotes);
 		
 		endNotes = new Paragraph(
-//				"\n1. ROI i.e. Return on Investment is calculated as a percentage of the department's actual cluster usage against their investment",
 				"\n"+notes,
 				FontFactory.getFont(FontFactory.HELVETICA, 9, Font.NORMAL,
 						Color.BLACK));
-//		endNotes.add("\n2. Group % is the percentage of core hours as against the group total for this period");
-//		endNotes.add("\n3. Cluster % is the percentage of core hours as against the cluster total for this period");
 			document.add(endNotes);
 		} catch (DocumentException e) {
 			e.printStackTrace();
@@ -864,12 +831,6 @@ public class ReportUtils {
 		document.close();
 		
 		log.info("Report Generated for "+dept.getDepartmentName());		
-		
-//		sm.setTo(dept.getEmail());
-//		sm.setSubject("Monthly Usage Report");
-//		sm.setText("hello");
-//		mailSendr.send(sm);
-		
 		
 		try {
 			message = mailSendr.createMimeMessage();
@@ -901,56 +862,6 @@ public class ReportUtils {
 			System.out.println("error occurred while sending email to: " + dept.getEmail());
 			log.error(e.toString());
 		}
-		
-		
-//javamail
-/*		
-		
-		System.out.println("start");
-		
-		try {
-			 
-			 message = new MimeMessage(session);
-			message.setFrom(new InternetAddress(username));
-			 
-			message.setRecipients(Message.RecipientType.TO,
-				InternetAddress.parse(dept.getEmail()));
-			message.setSubject("Monthly Usage Report");
-
-			// Create the message part 
-	         BodyPart messageBodyPart = new MimeBodyPart();
-
-	         // Fill the message
-	         messageBodyPart.setText("Dear "+dept.getDepartmentName()+","
-				+ "\n\nPlease find attached your monthly usage report");
-	         
-	         // Create a multipar message
-	         Multipart multipart = new MimeMultipart();
-
-	         // Set text message part
-	         multipart.addBodyPart(messageBodyPart);
-
-	         // Part two is attachment
-	         messageBodyPart = new MimeBodyPart();
-	         String filename = reportName+".pdf";
-	         DataSource source = new FileDataSource(filename);
-	         messageBodyPart.setDataHandler(new DataHandler(source));
-	         messageBodyPart.setFileName(filename);
-	         multipart.addBodyPart(messageBodyPart);
-
-	         // Send the complete message parts
-	         message.setContent(multipart );
- 
-			Transport.send(message);
- 
-			System.out.println("Done");
- 
-		} catch (MessagingException e) {
-			throw new RuntimeException(e);
-		}
-*/
-//javamailend		
-		
 	}
 
 	
