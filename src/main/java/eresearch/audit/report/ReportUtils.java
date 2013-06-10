@@ -879,7 +879,9 @@ public class ReportUtils {
 			
 			String deptHeadName=dept.getDepthead();
 			helper.setText("Dear "+((deptHeadName==null?"Head of Department":deptHeadName.substring(0,deptHeadName.indexOf(" "))))+","
-					+ "\n\nPlease find attached the monthly usage report for "+dept.getDepartmentName());
+					+ "\n\nPlease find attached the monthly usage report of the NeSI Pan Cluster for "+dept.getDepartmentName()
+			+ "\n\nKind regards, "
+			+ "\nThe Centre for eResearch and NeSI Auckland Team ");
 
 			FileSystemResource file = new FileSystemResource(new java.io.File(
 					reportName + ".pdf"));
