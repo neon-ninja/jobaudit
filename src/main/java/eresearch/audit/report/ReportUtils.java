@@ -177,13 +177,6 @@ public class ReportUtils {
 				List<BarDiagramStatistics> bds = getBdslist();
 				List<UserStatistics> us = getUserstatslist();
 
-				Collections.sort(us, new Comparator<UserStatistics>() {
-					public int compare(UserStatistics o1, UserStatistics o2) {
-						return ((Double) (Double.parseDouble(o2.getTotal_core_hours()) - Double
-								.parseDouble(o1.getTotal_core_hours()))).intValue();
-					}
-				});					
-				
 				createReport(us, bds);
 			} catch (Exception e) {
 				log.error(e.toString());
@@ -196,14 +189,6 @@ public class ReportUtils {
 				List<BarDiagramStatistics> bds = getBdslist();
 				List<UserStatistics> us = getUserstatslist();
 
-			//Sort the user-list in descending order of total core hour count
-				Collections.sort(us, new Comparator<UserStatistics>() {
-					public int compare(UserStatistics o1, UserStatistics o2) {
-						return ((Double) (Double.parseDouble(o2.getTotal_core_hours()) - Double
-								.parseDouble(o1.getTotal_core_hours()))).intValue();
-					}
-				});				
-				
 				createReport(us, bds); //populate the report with the above data
 			} catch (Exception e) {
 				log.error(e.toString());
@@ -358,6 +343,16 @@ public class ReportUtils {
 		NumberFormat numform = NumberFormat.getIntegerInstance(Locale.US);
 		Boolean startDateJan2012 = false;
 
+		//Sort the user-list in descending order of total core hour count
+		Collections.sort(users, new Comparator<UserStatistics>() {
+			public int compare(UserStatistics o1, UserStatistics o2) {
+				return ((Double) (Double.parseDouble(o2.getTotal_core_hours()) - Double
+						.parseDouble(o1.getTotal_core_hours()))).intValue();
+			}
+		});				
+		
+		
+		
 		//data from Jan2012 is displayed in a different way 
 		if (historyStartMonth == 0 && historyStartYear == 2012) {
 			startDateJan2012 = true;
@@ -385,17 +380,7 @@ public class ReportUtils {
 
 			int monthCount = historyStartMonth;
 			int yearCount = historyStartYear;
-/**
-			if (!startDateJan2012) {
-				int diff = historyStartMonth - 4;
-				if (diff < 0) {
-					monthCount = diff + 11;
-					yearCount -= 1;
-				} else {
-					monthCount = diff;
-				}
-			}
-**/			
+
 			if(startDateJan2012){
 				String monthName = null;
 				for (BarDiagramStatistics bs : bdslist) {
