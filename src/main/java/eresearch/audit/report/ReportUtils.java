@@ -356,14 +356,12 @@ public class ReportUtils {
 
 		DateFormatSymbols dfSym = new DateFormatSymbols();
 		NumberFormat numform = NumberFormat.getIntegerInstance(Locale.US);
-
 		Boolean startDateJan2012 = false;
 
 		//data from Jan2012 is displayed in a different way 
 		if (historyStartMonth == 0 && historyStartYear == 2012) {
 			startDateJan2012 = true;
 		}	
-
 		try {
 			DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
 			DefaultCategoryDataset dataSet2 = new DefaultCategoryDataset();
@@ -379,13 +377,15 @@ public class ReportUtils {
 				jobCount += jobInt;
 				coreHourCount += Double.parseDouble(temp.getTotal_core_hours());
 
-				dataSet.setValue(Integer.parseInt(temp.getJobs()), "Users",
-						temp.getUser());
+				if(startDateJan2012){
+					dataSet.setValue(Integer.parseInt(temp.getJobs()), "Users",
+							temp.getUser());
+				}
 			}
 
 			int monthCount = historyStartMonth;
 			int yearCount = historyStartYear;
-
+/**
 			if (!startDateJan2012) {
 				int diff = historyStartMonth - 4;
 				if (diff < 0) {
@@ -395,34 +395,34 @@ public class ReportUtils {
 					monthCount = diff;
 				}
 			}
+**/			
+			if(startDateJan2012){
+				String monthName = null;
+				for (BarDiagramStatistics bs : bdslist) {
 
-			String monthName = null;
-			for (BarDiagramStatistics bs : bdslist) {
+					monthName = dfSym.getMonths()[monthCount] + " " + yearCount;
+					dataSet2.addValue(bs.getParallel_jobs(), "Parallel jobs",
+							monthName);
+					dataSet2.addValue(bs.getSerial_jobs(), "Serial jobs",
+							monthName);
 
-				monthName = dfSym.getMonths()[monthCount] + " " + yearCount;
-				dataSet2.addValue(bs.getParallel_jobs(), "Parallel jobs",
-						monthName);
-				dataSet2.addValue(bs.getSerial_jobs(), "Serial jobs",
-						monthName);
+					dataSet3.addValue(bs.getParallel_core_hours(),
+							"parallel core hours", monthName);
+					dataSet3.addValue(bs.getSerial_core_hours(),
+							"serial core hours", monthName);
 
-				dataSet3.addValue(bs.getParallel_core_hours(),
-						"parallel core hours", monthName);
-				dataSet3.addValue(bs.getSerial_core_hours(),
-						"serial core hours", monthName);
+					dataSet4.addValue(bs.getAvg_waiting_hours(),
+							"average waiting hours", monthName);
 
-				dataSet4.addValue(bs.getAvg_waiting_hours(),
-						"average waiting hours", monthName);
-
-				monthCount++;
-				if (monthCount > 11) {
-					monthCount = 0;
-					yearCount++;
+					monthCount++;
+					if (monthCount > 11) {
+						monthCount = 0;
+						yearCount++;
+					}
 				}
 			}
-
+			
 			long clusterCoreHours = 0;
-			
-			
 			Calendar from = Calendar.getInstance();
 			Calendar to = Calendar.getInstance();
 
@@ -434,7 +434,6 @@ public class ReportUtils {
 
 			long starttime = startdate.getTime();
 			long endtime = endDate.getTime();
-
 			try {
 				clusterCoreHours = Long.parseLong(auditRecordDao
 						.getTotalCoreHoursInterval((starttime / 1000) + "",
@@ -486,24 +485,19 @@ public class ReportUtils {
 							/ availCoreHours));
 				}
 			}
-
 			p2.setSpacingBefore(30);
-
 			document.add(p2);
 			document.add(clusterUsage);
-
-			
-			PdfPTable table = getResearcherUsageTable(users, clusterCoreHours, coreHourCount);
 		
+			//Generate the Researcher-usage details table
+			PdfPTable table = getResearcherUsageTable(users, clusterCoreHours, coreHourCount);
 			table.setWidthPercentage(100);
 			table.setHeadersInEvent(true);
 			document.add(table);	
 			
-	// Bar Diagrams
+			// Bar Diagrams
 			if (startDateJan2012) {
-
 				PdfPTable barChartsTable = createBarChartsTable(writer, dataSet,dataSet2,dataSet3,dataSet4);
-
 				barChartsTable.setSpacingBefore(20);
 				barChartsTable.setWidthPercentage(100);
 				document.add(barChartsTable);
@@ -512,7 +506,6 @@ public class ReportUtils {
 			e.printStackTrace();
 			log.error(e.getMessage());
 		}
-		
 	}
 
 	private PdfPTable getResearcherUsageTable(List<UserStatistics> users, long clusterCoreHours, double coreHourCount) {
@@ -602,6 +595,7 @@ public class ReportUtils {
 		return table;
 	}
 
+	//generate the bar charts displayed towards the end of the report
 	private PdfPTable createBarChartsTable(PdfWriter writer2,
 			DefaultCategoryDataset dataSet, DefaultCategoryDataset dataSet2,
 			DefaultCategoryDataset dataSet3, DefaultCategoryDataset dataSet4) throws BadElementException {
