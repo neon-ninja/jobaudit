@@ -351,8 +351,6 @@ public class ReportUtils {
 			}
 		});				
 		
-		
-		
 		//data from Jan2012 is displayed in a different way 
 		if (historyStartMonth == 0 && historyStartYear == 2012) {
 			startDateJan2012 = true;
@@ -361,7 +359,7 @@ public class ReportUtils {
 			DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
 			DefaultCategoryDataset dataSet2 = new DefaultCategoryDataset();
 			DefaultCategoryDataset dataSet3 = new DefaultCategoryDataset();
-			DefaultCategoryDataset dataSet4 = new DefaultCategoryDataset();
+//			DefaultCategoryDataset dataSet4 = new DefaultCategoryDataset();
 
 			int jobCount = 0;
 			double coreHourCount = 0;
@@ -396,8 +394,8 @@ public class ReportUtils {
 					dataSet3.addValue(bs.getSerial_core_hours(),
 							"serial core hours", monthName);
 
-					dataSet4.addValue(bs.getAvg_waiting_hours(),
-							"average waiting hours", monthName);
+//					dataSet4.addValue(bs.getAvg_waiting_hours(),
+//							"average waiting hours", monthName);
 
 					monthCount++;
 					if (monthCount > 11) {
@@ -482,7 +480,7 @@ public class ReportUtils {
 			
 			// Bar Diagrams
 			if (startDateJan2012) {
-				PdfPTable barChartsTable = createBarChartsTable(writer, dataSet,dataSet2,dataSet3,dataSet4);
+				PdfPTable barChartsTable = createBarChartsTable(dataSet,dataSet2,dataSet3);
 				barChartsTable.setSpacingBefore(20);
 				barChartsTable.setWidthPercentage(100);
 				document.add(barChartsTable);
@@ -524,7 +522,6 @@ public class ReportUtils {
 		table.setSpacingBefore(20);
 		table.setSpacingAfter(10);
 		
-		
 		DecimalFormat decFormat = new DecimalFormat("#.#");
 		Double coreHourDouble;
 		
@@ -547,8 +544,7 @@ public class ReportUtils {
 
 			coreHourDouble = Double.parseDouble(temp.getTotal_core_hours());
 
-			table_cell = new PdfPCell(new Phrase(
-					numform.format(coreHourDouble), tableFont));
+			table_cell = new PdfPCell(new Phrase(numform.format(coreHourDouble), tableFont));
 			table_cell.setPadding(4);
 			table_cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 			table.addCell(table_cell);
@@ -576,22 +572,16 @@ public class ReportUtils {
 			table_cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 			table.addCell(table_cell);
 		}
-		
 		return table;
 	}
 
 	//generate the bar charts displayed towards the end of the report
-	private PdfPTable createBarChartsTable(PdfWriter writer2,
-			DefaultCategoryDataset dataSet, DefaultCategoryDataset dataSet2,
-			DefaultCategoryDataset dataSet3, DefaultCategoryDataset dataSet4) throws BadElementException {
+	private PdfPTable createBarChartsTable(DefaultCategoryDataset dataSet, DefaultCategoryDataset dataSet2,
+			DefaultCategoryDataset dataSet3) throws BadElementException {
 
 		PdfPTable barChartsTable = new PdfPTable(2);
 		
 		barChartsTable.getDefaultCell().setBorderWidth(0);
-
-		JFreeChart chart = ChartFactory.createBarChart(
-				"User Statistics", "User", "jobs", dataSet,
-				PlotOrientation.HORIZONTAL, false, true, false);
 
 		// stacked chart for serial and parallel jobs (job count)
 		JFreeChart stackedChart = ChartFactory.createStackedBarChart(
@@ -603,16 +593,14 @@ public class ReportUtils {
 		stackedChart.getCategoryPlot().getDomainAxis().setTickLabelFont(new java.awt.Font(java.awt.Font.DIALOG, 1, 14));
 		stackedChart.getCategoryPlot().getRangeAxis().setTickLabelFont(new java.awt.Font(java.awt.Font.DIALOG, 1, 14));
 
-		// get a reference to the plot for further customisation...
-		BarRenderer bsr = (BarRenderer) stackedChart.getCategoryPlot()
-				.getRenderer();
+		// get a reference to the plot for further customisation
+		BarRenderer bsr = (BarRenderer) stackedChart.getCategoryPlot().getRenderer();
 		bsr.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
 		bsr.setMaximumBarWidth(0.20); // if not used, it displays giant
-										// bars
-										// for single month data
+										// bars for single month data
 		bsr.setShadowVisible(false);
 		stackedChart.getCategoryPlot().setRenderer(bsr);
-		bsr.setItemMargin(10);
+		bsr.setItemMargin(0);
 		bsr.setDefaultBarPainter(new StandardBarPainter());
 
 		BufferedImage bufferedImage;
@@ -646,6 +634,7 @@ public class ReportUtils {
 										// for single month data
 		bsr.setShadowVisible(false);
 		bsr.setDrawBarOutline(false);
+		
 		bsr.setItemMargin(10);
 
 		bsr.setDefaultBarPainter(new GradientBarPainter());
