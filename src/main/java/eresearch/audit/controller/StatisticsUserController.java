@@ -120,7 +120,7 @@ public class StatisticsUserController extends StatisticsController {
         }
 **/
 		
-		reportUtils.getReportContent(userlist, super.historyStartYear, super.historyStartMonth, super.historyEndYear, super.historyEndMonth, false);
+		reportUtils.getReportContent(userlist, super.historyStartYear, super.historyStartMonth, super.historyEndYear, super.historyEndMonth);
 		userstatslist = reportUtils.getUserstatslist();
 		bdslist = reportUtils.getBdslist();
 		
