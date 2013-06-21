@@ -290,9 +290,9 @@
         <th>Average Waiting Hours</th>
       </tr>
       <tr>
-        <td><div id="monthly_jobs_plot" style="width:380px;height:200px;"></div></td>
-        <td><div id="monthly_core_hours_plot" style="width:380px;height:200px;"></div></p></td>
-        <td><div id="monthly_avg_waiting_hours_plot" style="width:380px;height:200px;"></div></td>
+        <td><div id="monthly_jobs_plot" style="width:380px;height:300px;"></div></td>
+        <td><div id="monthly_core_hours_plot" style="width:380px;height:300px;"></div></p></td>
+        <td><div id="monthly_avg_waiting_hours_plot" style="width:380px;height:300px;"></div></td>
       </tr>
     </table>
     <br>
