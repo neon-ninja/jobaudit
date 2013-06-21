@@ -459,13 +459,13 @@ public class ReportUtils {
 				int investment = dept.getInvestment();
 				//don't display ROI if the department investment is null
 				if (investment > 0) {
-					long diffDays = (endtime - starttime)
-							/ (24 * 60 * 60 * 1000);
-					long availCoreHours = investment * diffDays * 24;
+					long diffHours = (endtime - starttime)
+							/ (60 * 60 * 1000);
+					long availCoreHours = investment * diffHours;
 				
 					clusterUsage.addCell("ROI¹:");
 					clusterUsage.addCell(numform.format(coreHourCount * 100
-							/ availCoreHours));
+							/ availCoreHours)+"%");
 				}
 			}
 			p2.setSpacingBefore(30);
@@ -635,7 +635,7 @@ public class ReportUtils {
 		bsr.setShadowVisible(false);
 		bsr.setDrawBarOutline(false);
 		
-		bsr.setItemMargin(10);
+		bsr.setItemMargin(0);
 
 		bsr.setDefaultBarPainter(new GradientBarPainter());
 		stackedChart.getCategoryPlot().setRenderer(bsr);
