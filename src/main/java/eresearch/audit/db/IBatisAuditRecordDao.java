@@ -77,9 +77,6 @@ public class IBatisAuditRecordDao extends SqlMapClientDaoSupport implements Audi
 		else{
 			tempFrom=(from.get(Calendar.MONTH)+1);
 			tempTo=(to.get(Calendar.MONTH));
-			if(tempFrom>tempTo){ //1 month data
-				tempTo = tempFrom;
-			}
 			mmFrom = tempFrom+"";
 			mmTo = tempTo+"";
 			return getStatisticsForUser(userlist, ""+from.get(Calendar.YEAR)+(mmFrom.length()==1?"0"+mmFrom:mmFrom), ""+to.get(Calendar.YEAR)+(mmTo.length()==1?"0"+mmTo:mmTo));
